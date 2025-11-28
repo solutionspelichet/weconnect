@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <!-- C'est cette ligne qui rend le site responsive sur mobile -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ma Carte Digitale</title>
+    <!-- Icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Police Google Fonts (Inter pour un look moderne comme WeMet) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Couleurs inspirées de vos captures */
+            --primary-color: #3b82f6; /* Bleu vif */
+            --primary-dark: #2563eb;
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-main: #111827;
+            --text-sub: #6b7280;
+            --header-bg: #000000;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            color: var(--text-main);
+        }
+
+        /* Conteneur principal qui simule l'app mobile */
+        .app-container {
+            width: 100%;
+            max-width: 480px; /* Largeur max type mobile */
+            background-color: var(--card-bg);
+            min-height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+        }
+
+        /* Header Noir */
+        .header {
+            background-color: var(--header-bg);
+            height: 140px;
+            width: 100%;
+            border-bottom-left-radius: 30px;
+            border-bottom-right-radius: 30px;
+            display: flex;
+            justify-content: center;
+            padding-top: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo {
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* Section Profil (Photo + Nom) */
+        .profile-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: -60px; /* Remonte sur le header */
+            z-index: 2;
+            padding: 0 20px;
+        }
+
+        .profile-img-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+        }
+
+        .profile-img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%; /* Rond parfait */
+            object-fit: cover;
+            border: 4px solid white;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            background-color: #e5e7eb;
+        }
+
+        /* Drapeau langue (petit détail vu sur la capture) */
+        .lang-flag {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background: white;
+            border-radius: 50%;
+            padding: 4px;
+            font-size: 14px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .user-info {
+            text-align: center;
+            margin-top: 15px;
+            margin-bottom: 25px;
+        }
+
+        .user-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+            color: var(--text-main);
+        }
+
+        .user-title {
+            font-size: 1rem;
+            color: var(--text-sub);
+            margin: 5px 0;
+            font-weight: 400;
+        }
+
+        .user-company {
+            font-size: 0.95rem;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        /* Boutons d'action principaux */
+        .actions-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            padding: 0 20px;
+            margin-bottom: 25px;
+        }
+
+        .btn-action {
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.2s, opacity 0.2s;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .btn-action:active {
+            transform: scale(0.96);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+        
+        .btn-secondary {
+            background-color: white;
+            color: var(--text-main);
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        /* Liste des widgets (infos) */
+        .widgets-list {
+            padding: 0 20px 40px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .widget-card {
+            background: white;
+            border: 1px solid #f3f4f6;
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            text-decoration: none;
+            color: inherit;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s;
+        }
+
+        .widget-card:active {
+            transform: scale(0.98);
+            background-color: #f9fafb;
+        }
+
+        .widget-icon {
+            width: 40px;
+            height: 40px;
+            background-color: #eff6ff;
+            color: var(--primary-color);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .widget-text {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .widget-label {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            margin-bottom: 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .widget-value {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-main);
+            word-break: break-word; /* Évite que les longs emails cassent le design */
+        }
+
+        /* Loader */
+        .loader-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+            transition: opacity 0.5s;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    </style>
+</head>
+<body>
+
+    <!-- Ecran de chargement -->
+    <div id="loader" class="loader-overlay">
+        <div class="spinner"></div>
+        <div style="color: var(--text-sub); font-size: 0.9rem;">Chargement du profil...</div>
+    </div>
+
+    <!-- Contenu principal -->
+    <div class="app-container" id="app-content" style="opacity: 0; transition: opacity 0.5s;">
+        
+        <div class="header">
+            <div class="logo">WECONNECT</div>
+        </div>
+
+        <div class="profile-section">
+            <div class="profile-img-container">
+                <img id="p-photo" src="" alt="Photo de profil" class="profile-img">
+                <div class="lang-flag">🇫🇷</div>
+            </div>
+            
+            <div class="user-info">
+                <h1 id="p-name" class="user-name"></h1>
+                <p id="p-title" class="user-title"></p>
+                <div id="p-company" class="user-company"></div>
+            </div>
+        </div>
+
+        <div class="actions-grid">
+            <a href="#" class="btn-action btn-primary" onclick="downloadVCard()">
+                <i class="fas fa-user-plus"></i>
+                <span>Sauvegarder</span>
+            </a>
+            <a href="#" class="btn-action btn-secondary" id="btn-share">
+                <i class="fas fa-share-alt"></i>
+                <span>Partager</span>
+            </a>
+        </div>
+
+        <div class="widgets-list">
+            
+            <a href="#" id="link-phone" class="widget-card">
+                <div class="widget-icon"><i class="fas fa-phone-alt"></i></div>
+                <div class="widget-text">
+                    <span class="widget-label">Téléphone</span>
+                    <span id="p-phone" class="widget-value"></span>
+                </div>
+                <i class="fas fa-chevron-right" style="color:#d1d5db; font-size: 0.8rem;"></i>
+            </a>
+
+            <a href="#" id="link-email" class="widget-card">
+                <div class="widget-icon"><i class="fas fa-envelope"></i></div>
+                <div class="widget-text">
+                    <span class="widget-label">Email</span>
+                    <span id="p-email" class="widget-value"></span>
+                </div>
+                <i class="fas fa-chevron-right" style="color:#d1d5db; font-size: 0.8rem;"></i>
+            </a>
+
+            <a href="#" id="link-web" class="widget-card" target="_blank">
+                <div class="widget-icon"><i class="fas fa-globe"></i></div>
+                <div class="widget-text">
+                    <span class="widget-label">Site Web</span>
+                    <span id="p-web" class="widget-value"></span>
+                </div>
+                <i class="fas fa-chevron-right" style="color:#d1d5db; font-size: 0.8rem;"></i>
+            </a>
+
+            <a href="#" id="link-linkedin" class="widget-card" target="_blank">
+                <div class="widget-icon"><i class="fab fa-linkedin-in"></i></div>
+                <div class="widget-text">
+                    <span class="widget-label">LinkedIn</span>
+                    <span class="widget-value">Voir le profil</span>
+                </div>
+                <i class="fas fa-chevron-right" style="color:#d1d5db; font-size: 0.8rem;"></i>
+            </a>
+
+             <div class="widget-card" style="border:none; background:transparent; box-shadow:none; justify-content:center;">
+                <button onclick="window.open('https://github.com', '_blank')" style="background:none; border:none; color:var(--text-sub); font-size:0.8rem; cursor:pointer;">
+                    Créé avec GitHub & Google Sheets
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        // Remplacez ceci par l'URL de votre script Google Apps quand vous l'aurez déployé
+        const API_URL = 'https://script.google.com/macros/s/AKfycbz12V16okyQngAw7QCUeRZNsbI4jy5aH4vfSk-kxL3jl1Dl3P-f0pAxlX0CKtQgZnGE8A/exec'; 
+
+        // Données de démonstration (affichées si pas d'API ou pas d'ID)
+        const demoData = {
+            nom: "Arnaud Guedou",
+            poste: "Key Account Manager",
+            societe: "Pélichet",
+            telephone: "+41 22 827 80 00",
+            email: "arnaud.guedou@pelichet.ch",
+            site_web: "www.pelichet.ch",
+            linkedin: "https://www.linkedin.com/",
+            photo_url: "https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=256&q=80"
+        };
+
+        let currentUser = {};
+
+        async function init() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const userId = urlParams.get('id');
+
+            // Simulation d'attente réseau pour l'effet "App"
+            setTimeout(async () => {
+                if (API_URL && userId) {
+                    try {
+                        const response = await fetch(API_URL);
+                        const data = await response.json();
+                        const user = data.find(u => u.id == userId);
+                        if (user) {
+                            renderProfile(user);
+                        } else {
+                            alert("Utilisateur non trouvé, affichage démo.");
+                            renderProfile(demoData);
+                        }
+                    } catch (e) {
+                        console.error("Erreur API", e);
+                        renderProfile(demoData);
+                    }
+                } else {
+                    // Pas d'API configurée ou pas d'ID => Mode Démo
+                    console.log("Mode Démo activé");
+                    renderProfile(demoData);
+                }
+            }, 800); // Petit délai pour voir le loader
+        }
+
+        function renderProfile(data) {
+            currentUser = data;
+
+            // Injection des textes
+            setText('p-name', data.nom);
+            setText('p-title', data.poste);
+            setText('p-company', data.societe || 'Pélichet'); // Fallback si pas de société
+            setText('p-phone', data.telephone);
+            setText('p-email', data.email);
+            setText('p-web', data.site_web);
+
+            // Injection des liens
+            setHref('link-phone', `tel:${data.telephone}`);
+            setHref('link-email', `mailto:${data.email}`);
+            
+            let webUrl = data.site_web;
+            if(webUrl && !webUrl.startsWith('http')) webUrl = 'https://' + webUrl;
+            setHref('link-web', webUrl);
+            setHref('link-linkedin', data.linkedin);
+
+            // Image
+            const img = document.getElementById('p-photo');
+            img.src = data.photo_url || 'https://via.placeholder.com/150';
+            img.onerror = function() { this.src = 'https://via.placeholder.com/150'; };
+
+            // Afficher le contenu
+            document.getElementById('loader').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('app-content').style.opacity = '1';
+            }, 500);
+        }
+
+        function setText(id, text) {
+            const el = document.getElementById(id);
+            if(el) el.textContent = text || '';
+        }
+
+        function setHref(id, link) {
+            const el = document.getElementById(id);
+            if(el) {
+                if(link) el.href = link;
+                else el.style.display = 'none'; // Cache le bouton si pas de lien
+            }
+        }
+
+        // Fonction Génération VCF (Contact)
+        function downloadVCard() {
+            if(!currentUser.nom) return;
+            
+            // Format vCard standard
+            const vcardBody = [
+                'BEGIN:VCARD',
+                'VERSION:3.0',
+                `FN:${currentUser.nom}`,
+                `TITLE:${currentUser.poste}`,
+                `ORG:${currentUser.societe || ''}`,
+                `TEL;TYPE=CELL:${currentUser.telephone}`,
+                `EMAIL:${currentUser.email}`,
+                `URL:${currentUser.site_web}`,
+                'END:VCARD'
+            ].join('\n');
+
+            const blob = new Blob([vcardBody], { type: 'text/vcard;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `${currentUser.nom.replace(/\s+/g, '_')}.vcf`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Bouton partager (API native du téléphone si dispo)
+        document.getElementById('btn-share').addEventListener('click', async (e) => {
+            e.preventDefault();
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: `Carte de visite de ${currentUser.nom}`,
+                        text: `Voici les coordonnées de ${currentUser.nom}`,
+                        url: window.location.href
+                    });
+                } catch (err) {
+                    console.log('Partage annulé');
+                }
+            } else {
+                // Fallback: Copier le lien
+                navigator.clipboard.writeText(window.location.href);
+                alert('Lien copié dans le presse-papier !');
+            }
+        });
+
+        window.onload = init;
+    </script>
+</body>
+</html>
