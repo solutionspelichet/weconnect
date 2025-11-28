@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ma Carte Digitale</title>
+    <!-- Icônes et Polices -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-main: #111827;
+            --text-sub: #6b7280;
+            --header-bg: #000000;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            color: var(--text-main);
+        }
+
+        /* --- STYLES CARTE VISITE (VUE PAR DEFAUT) --- */
+        #view-mode {
+            width: 100%;
+            max-width: 480px;
+            background-color: var(--card-bg);
+            min-height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+        }
+
+        .header {
+            background-color: var(--header-bg);
+            height: 140px;
+            width: 100%;
+            border-bottom-left-radius: 30px;
+            border-bottom-right-radius: 30px;
+            display: flex;
+            justify-content: center;
+            padding-top: 20px;
+            position: relative;
+            z-index: 1;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .logo-text { color: white; font-weight: 700; font-size: 1.2rem; letter-spacing: 1px; text-transform: uppercase; }
+
+        .profile-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: -60px;
+            z-index: 2;
+            padding: 0 20px;
+        }
+
+        .profile-img-container { position: relative; width: 120px; height: 120px; }
+        .profile-img {
+            width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
+            border: 4px solid white; box-shadow: 0 8px 16px rgba(0,0,0,0.1); background-color: #e5e7eb;
+        }
+        .lang-flag {
+            position: absolute; bottom: 5px; right: 5px; background: white;
+            border-radius: 50%; padding: 4px; font-size: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .user-info { text-align: center; margin-top: 15px; margin-bottom: 25px; }
+        .user-name { font-size: 1.5rem; font-weight: 700; margin: 0; color: var(--text-main); }
+        .user-title { font-size: 1rem; color: var(--text-sub); margin: 5px 0; font-weight: 400; }
+        .user-company { font-size: 0.95rem; color: var(--primary-color); font-weight: 600; }
+        .user-desc { font-size: 0.9rem; color: var(--text-sub); margin-top: 10px; font-style: italic; }
+
+        .actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 20px; margin-bottom: 25px; }
+        .btn-action {
+            border: none; padding: 14px; border-radius: 12px; font-size: 0.95rem; font-weight: 600;
+            cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px;
+            text-decoration: none; text-align: center; transition: transform 0.2s;
+        }
+        .btn-action:active { transform: scale(0.96); }
+        .btn-primary { background-color: var(--primary-color); color: white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+        .btn-secondary { background-color: white; color: var(--text-main); border: 1px solid #e5e7eb; }
+
+        .widgets-list { padding: 0 20px 40px 20px; display: flex; flex-direction: column; gap: 15px; }
+        .widget-card {
+            background: white; border: 1px solid #f3f4f6; border-radius: 16px; padding: 16px;
+            display: flex; align-items: center; gap: 16px; text-decoration: none; color: inherit;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .widget-icon {
+            width: 40px; height: 40px; background-color: #eff6ff; color: var(--primary-color);
+            border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+        }
+        .widget-text { display: flex; flex-direction: column; flex: 1; }
+        .widget-label { font-size: 0.8rem; color: var(--text-sub); margin-bottom: 2px; text-transform: uppercase; font-weight: 600; }
+        .widget-value { font-size: 1rem; font-weight: 500; color: var(--text-main); word-break: break-word; }
+
+        /* --- STYLES EDITEUR (CACHÉ PAR DEFAUT) --- */
+        #edit-mode {
+            display: none; /* Caché au départ */
+            width: 100%;
+            max-width: 600px;
+            background-color: #f3f4f6;
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: white;
+            padding: 10px 10px 0 10px;
+            border-bottom: 1px solid #e5e7eb;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .nav-tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #6b7280;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-tab.active {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+        }
+        
+        .tab-content { display: none; padding: 20px; }
+        .tab-content.active { display: block; }
+
+        .edit-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .form-group { margin-bottom: 1.5rem; }
+        .form-label { display: block; font-weight: 600; color: #374151; margin-bottom: 0.5rem; font-size: 0.95rem; }
+        .form-input { 
+            width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; 
+            background: #fff; transition: border-color 0.2s;
+        }
+        .form-input:focus { outline: none; border-color: var(--primary-color); ring: 2px solid #bfdbfe; }
+        
+        .upload-area {
+            border: 2px dashed #d1d5db; border-radius: 8px; padding: 15px;
+            display: flex; align-items: center; gap: 10px; background: #f9fafb; cursor: pointer;
+        }
+        .upload-preview { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; border: 1px solid #e5e7eb; background: #fff;}
+        
+        .color-picker-wrapper { display: flex; align-items: center; gap: 10px; }
+        .color-preview { width: 40px; height: 40px; border-radius: 8px; border: 1px solid #ddd; }
+
+        /* Loader */
+        .loader-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: white;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 999;
+            transition: opacity 0.5s;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3; border-top: 4px solid var(--primary-color); border-radius: 50%;
+            width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Floating Edit Button on Card */
+        .edit-trigger {
+            position: fixed; bottom: 20px; right: 20px;
+            width: 50px; height: 50px; background: white; border-radius: 50%;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; z-index: 50; color: #4b5563;
+            transition: transform 0.2s;
+        }
+        .edit-trigger:hover { transform: scale(1.1); color: var(--primary-color); }
+
+    </style>
+</head>
+<body>
+    
+    <!-- LOADER -->
+    <div id="loader" class="loader-overlay">
+        <div class="spinner"></div>
+        <div>Chargement...</div>
+    </div>
+
+    <!-- === MODE 1 : CARTE DE VISITE (Vue par défaut) === -->
+    <div id="view-mode" class="app-container">
+        
+        <div class="header" id="v-header-bg">
+            <div class="logo-text" id="v-logo-text">WEMET</div>
+            <img id="v-logo-img" src="" style="display:none; height: 40px; object-fit: contain;">
+        </div>
+        
+        <div class="profile-section">
+            <div class="profile-img-container">
+                <img id="v-photo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2UzZTdlYiI+PHBhdGggZD0iTTEyIDEyYy0yLjIxIDAtNC0xLjc5LTQtNHMxLjc5LTQgNC00IDQgMS43OSA0IDQtMS43OSA0LTQgNHptMCAyYy0yLjY3IDAtOCAxLjM0LTggNHYyaDE2di0yYzAtMi42Ni01LjMzLTQtOC00eiIvPjwvc3ZnPg==" class="profile-img" alt="Profil">
+                <div class="lang-flag">🇫🇷</div>
+            </div>
+            <div class="user-info">
+                <h1 id="v-name" class="user-name"></h1>
+                <p id="v-title" class="user-title"></p>
+                <div id="v-company" class="user-company"></div>
+                <p id="v-desc" class="user-desc"></p>
+            </div>
+        </div>
+
+        <div class="actions-grid">
+            <button class="btn-action btn-primary" onclick="downloadVCard()">
+                <i class="fas fa-user-plus text-xl mb-1"></i><span>Sauvegarder</span>
+            </button>
+            <button class="btn-action btn-secondary" id="btn-share">
+                <i class="fas fa-share-alt text-xl mb-1"></i><span>Partager</span>
+            </button>
+        </div>
+
+        <div class="widgets-list">
+            <a href="#" id="link-phone" class="widget-card">
+                <div class="widget-icon"><i class="fas fa-phone-alt"></i></div>
+                <div class="widget-text"><span class="widget-label">Téléphone</span><span id="v-phone-txt" class="widget-value"></span></div>
+                <i class="fas fa-chevron-right text-gray-300"></i>
+            </a>
+
+            <a href="#" id="link-email" class="widget-card">
+                <div class="widget-icon"><i class="fas fa-envelope"></i></div>
+                <div class="widget-text"><span class="widget-label">Email</span><span id="v-email-txt" class="widget-value"></span></div>
+                <i class="fas fa-chevron-right text-gray-300"></i>
+            </a>
+
+            <a href="#" id="link-web" class="widget-card" target="_blank">
+                <div class="widget-icon"><i class="fas fa-globe"></i></div>
+                <div class="widget-text"><span class="widget-label">Site Web</span><span id="v-web-txt" class="widget-value"></span></div>
+                <i class="fas fa-chevron-right text-gray-300"></i>
+            </a>
+
+            <a href="#" id="link-linkedin" class="widget-card" target="_blank">
+                <div class="widget-icon"><i class="fab fa-linkedin-in"></i></div>
+                <div class="widget-text"><span class="widget-label">LinkedIn</span><span class="widget-value">Voir le profil</span></div>
+                <i class="fas fa-chevron-right text-gray-300"></i>
+            </a>
+        </div>
+
+        <!-- Bouton discret pour passer en mode édition -->
+        <div class="edit-trigger" onclick="toggleEditMode()" title="Modifier ma carte">
+            <i class="fas fa-pen"></i>
+        </div>
+    </div>
+
+
+    <!-- === MODE 2 : EDITEUR (Caché par défaut) === -->
+    <div id="edit-mode">
+        <!-- Header Editeur -->
+        <div class="bg-white p-4 flex justify-between items-center shadow-sm sticky top-0 z-20">
+            <div class="font-bold text-lg">Ma carte</div>
+            <div class="bg-blue-600 text-white px-3 py-1 rounded text-sm font-medium" id="header-user-id">ID</div>
+            <button onclick="toggleEditMode()" class="text-gray-500 hover:text-black"><i class="fas fa-times text-xl"></i></button>
+        </div>
+
+        <!-- Onglets Navigation -->
+        <div class="nav-tabs">
+            <div class="nav-tab active" onclick="switchTab('tab-infos')"><i class="fas fa-list-ul mr-2"></i>Infos</div>
+            <div class="nav-tab" onclick="switchTab('tab-apparence')"><i class="fas fa-paint-brush mr-2"></i>Apparence</div>
+            <div class="nav-tab" onclick="switchTab('tab-widgets')"><i class="fas fa-th-large mr-2"></i>Widgets</div>
+        </div>
+
+        <!-- Contenu Onglet : INFORMATIONS -->
+        <div id="tab-infos" class="tab-content active">
+            <div class="edit-card">
+                <div class="form-group">
+                    <label class="form-label">Identifiant (ID)</label>
+                    <input type="text" id="f-id" class="form-input bg-gray-100 cursor-not-allowed" readonly>
+                    <p class="text-xs text-gray-500 mt-1">L'identifiant ne peut pas être modifié ici.</p>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label class="form-label">Prénom</label>
+                        <input type="text" id="f-prenom" class="form-input" placeholder="Jean">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nom</label>
+                        <input type="text" id="f-nom" class="form-input" placeholder="Dupont">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Société</label>
+                    <input type="text" id="f-societe" class="form-input" placeholder="Votre entreprise">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Poste</label>
+                    <input type="text" id="f-poste" class="form-input" placeholder="Directeur...">
+                </div>
+            </div>
+        </div>
+
+        <!-- Contenu Onglet : APPARENCE -->
+        <div id="tab-apparence" class="tab-content">
+            
+            <div class="edit-card">
+                <h3 class="font-bold text-lg mb-4 text-blue-600">Photo de profil</h3>
+                <div class="upload-area" onclick="document.getElementById('upl-photo').click()">
+                    <img id="prev-photo" src="https://via.placeholder.com/50" class="upload-preview">
+                    <div class="flex-1">
+                        <span class="text-sm font-medium text-gray-700">Sélectionnez un fichier...</span>
+                        <input type="file" id="upl-photo" class="hidden" accept="image/*" onchange="handleImage(event, 'photo_url', 'prev-photo')">
+                    </div>
+                    <i class="fas fa-cloud-upload-alt text-gray-400"></i>
+                </div>
+                <input type="hidden" id="f-photo_url">
+            </div>
+
+            <div class="edit-card">
+                <h3 class="font-bold text-lg mb-4 text-blue-600">Description</h3>
+                <textarea id="f-desc" class="form-input h-24" placeholder="Une courte description..."></textarea>
+            </div>
+
+            <div class="edit-card">
+                <h3 class="font-bold text-lg mb-4 text-blue-600">Logo & Bannière</h3>
+                
+                <label class="form-label">Logo (Header)</label>
+                <div class="upload-area mb-4" onclick="document.getElementById('upl-logo').click()">
+                    <img id="prev-logo" src="https://via.placeholder.com/50" class="upload-preview">
+                    <div class="flex-1 text-sm text-gray-700">Ajouter un logo...</div>
+                    <input type="file" id="upl-logo" class="hidden" accept="image/*" onchange="handleImage(event, 'logo_url', 'prev-logo')">
+                </div>
+                <input type="hidden" id="f-logo_url">
+
+                <label class="form-label">Bannière (Fond Header)</label>
+                <div class="upload-area" onclick="document.getElementById('upl-banner').click()">
+                    <img id="prev-banner" src="https://via.placeholder.com/50" class="upload-preview">
+                    <div class="flex-1 text-sm text-gray-700">Ajouter une bannière...</div>
+                    <input type="file" id="upl-banner" class="hidden" accept="image/*" onchange="handleImage(event, 'banner_url', 'prev-banner')">
+                </div>
+                <input type="hidden" id="f-banner_url">
+            </div>
+
+            <div class="edit-card">
+                <h3 class="font-bold text-lg mb-4 text-blue-600">Thème</h3>
+                <div class="flex gap-4 mb-4">
+                    <button class="flex-1 bg-blue-600 text-white py-2 rounded shadow">Light</button>
+                    <button class="flex-1 bg-gray-200 text-gray-700 py-2 rounded">Dark</button>
+                </div>
+                <div class="flex items-center justify-between mb-2">
+                    <span class="font-medium">Couleur Principale</span>
+                    <input type="color" id="f-color1" value="#3b82f6" class="h-8 w-14 cursor-pointer">
+                </div>
+            </div>
+        </div>
+
+        <!-- Contenu Onglet : WIDGETS -->
+        <div id="tab-widgets" class="tab-content">
+            <div class="edit-card">
+                <div class="form-group">
+                    <label class="form-label"><i class="fas fa-phone mr-2 text-blue-500"></i> Téléphone</label>
+                    <input type="tel" id="f-telephone" class="form-input" placeholder="+33 6...">
+                </div>
+                <div class="form-group">
+                    <label class="form-label"><i class="fas fa-envelope mr-2 text-blue-500"></i> Email</label>
+                    <input type="email" id="f-email" class="form-input" placeholder="email@exemple.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label"><i class="fas fa-globe mr-2 text-blue-500"></i> Site Web</label>
+                    <input type="text" id="f-site_web" class="form-input" placeholder="www.monsite.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label"><i class="fab fa-linkedin mr-2 text-blue-700"></i> LinkedIn</label>
+                    <input type="text" id="f-linkedin" class="form-input" placeholder="Lien Profil LinkedIn">
+                </div>
+            </div>
+        </div>
+
+        <!-- Bouton Sauvegarder Fixe -->
+        <div class="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 shadow-lg flex justify-center z-30 max-w-2xl mx-auto">
+            <button onclick="saveData()" id="btn-save-edit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full w-full shadow-lg transition flex justify-center items-center gap-2">
+                Sauvegarder
+            </button>
+        </div>
+    </div>
+
+
+    <script>
+        // CONFIGURATION
+        const API_URL = 'https://script.google.com/macros/s/AKfycbz12V16okyQngAw7QCUeRZNsbI4jy5aH4vfSk-kxL3jl1Dl3P-f0pAxlX0CKtQgZnGE8A/exec'; 
+
+        let currentUser = {};
+
+        // INITIALISATION
+        window.onload = async function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const userId = urlParams.get('id');
+            const editMode = urlParams.get('edit'); // ?edit=true pour ouvrir direct l'éditeur
+
+            if(userId) {
+                try {
+                    const response = await fetch(API_URL);
+                    const data = await response.json();
+                    const user = data.find(u => u.id == userId);
+                    if(user) {
+                        currentUser = user;
+                        renderCard(user);
+                        fillEditor(user);
+                        if(editMode === 'true') toggleEditMode(true);
+                    } else {
+                        // User non trouvé, mode création ?
+                        document.getElementById('v-name').textContent = "Utilisateur inconnu";
+                        currentUser.id = userId;
+                        fillEditor(currentUser);
+                    }
+                } catch(e) { console.error(e); }
+            } else {
+                // Pas d'ID, mode démo
+                document.getElementById('f-id').value = "user_" + Math.floor(Math.random() * 10000);
+            }
+            
+            // Masquer le loader
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('app-content').style.opacity = '1';
+        };
+
+        // --- FONCTIONS VUE (CARTE) ---
+        function renderCard(data) {
+            // Textes
+            const fullName = (data.prenom ? data.prenom + ' ' : '') + (data.nom || '');
+            setText('v-name', fullName);
+            setText('v-title', data.poste);
+            setText('v-company', data.societe);
+            setText('v-desc', data.description); // Nouveau champ
+            
+            setText('v-phone-txt', data.telephone);
+            setText('v-email-txt', data.email);
+            setText('v-web-txt', data.site_web);
+
+            // Liens
+            setHref('link-phone', data.telephone ? `tel:${data.telephone}` : null);
+            setHref('link-email', data.email ? `mailto:${data.email}` : null);
+            setHref('link-web', formatUrl(data.site_web));
+            setHref('link-linkedin', formatUrl(data.linkedin));
+
+            // Images
+            const photoUrl = formatDriveLink(data.photo_url);
+            if(photoUrl) document.getElementById('v-photo').src = photoUrl;
+            
+            const logoUrl = formatDriveLink(data.logo_url);
+            if(logoUrl) {
+                const elLogo = document.getElementById('v-logo-img');
+                elLogo.src = logoUrl;
+                elLogo.style.display = 'block';
+                document.getElementById('v-logo-text').style.display = 'none';
+            }
+
+            if(data.banner_url) {
+                const bgUrl = formatDriveLink(data.banner_url);
+                document.getElementById('v-header-bg').style.backgroundImage = `url('${bgUrl}')`;
+            }
+
+            // Couleurs
+            if(data.color1) {
+                document.documentElement.style.setProperty('--primary-color', data.color1);
+            }
+        }
+
+        // --- FONCTIONS EDITEUR ---
+        function toggleEditMode(forceOpen = false) {
+            const viewDiv = document.getElementById('view-mode');
+            const editDiv = document.getElementById('edit-mode');
+            
+            if (editDiv.style.display === 'block' && !forceOpen) {
+                editDiv.style.display = 'none';
+                viewDiv.style.display = 'flex';
+                // Rafraichir la vue avec les données potentiellement modifiées
+                renderCard(currentUser); 
+                window.scrollTo(0,0);
+            } else {
+                viewDiv.style.display = 'none';
+                editDiv.style.display = 'block';
+                window.scrollTo(0,0);
+            }
+        }
+
+        function switchTab(tabId) {
+            // Masquer tous les contenus
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            // Desactiver tous les onglets
+            document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+            
+            // Activer la cible
+            document.getElementById(tabId).classList.add('active');
+            // Trouver l'onglet cliqué et l'activer (via l'event courant)
+            event.currentTarget.classList.add('active');
+        }
+
+        function fillEditor(data) {
+            document.getElementById('header-user-id').textContent = data.id || 'Nouveau';
+            
+            // Champs texte
+            setValue('f-id', data.id);
+            setValue('f-prenom', data.prenom);
+            setValue('f-nom', data.nom);
+            setValue('f-societe', data.societe);
+            setValue('f-poste', data.poste);
+            setValue('f-desc', data.description); // Nouveau
+            setValue('f-telephone', data.telephone);
+            setValue('f-email', data.email);
+            setValue('f-site_web', data.site_web);
+            setValue('f-linkedin', data.linkedin);
+            
+            // Champs images cachés
+            setValue('f-photo_url', data.photo_url);
+            setValue('f-logo_url', data.logo_url); // Nouveau
+            setValue('f-banner_url', data.banner_url); // Nouveau
+            
+            // Couleurs
+            if(data.color1) document.getElementById('f-color1').value = data.color1;
+
+            // Previews
+            if(data.photo_url) document.getElementById('prev-photo').src = formatDriveLink(data.photo_url);
+            if(data.logo_url) document.getElementById('prev-logo').src = formatDriveLink(data.logo_url);
+            if(data.banner_url) document.getElementById('prev-banner').src = formatDriveLink(data.banner_url);
+        }
+
+        // --- GESTION IMAGE GENERIQUE (COMPRESSION) ---
+        function handleImage(event, hiddenFieldId, previewId) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function(e) {
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Resize max
+                    const MAX_SIZE = 800; 
+                    let width = img.width; let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; }
+                    } else {
+                        if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
+                    }
+
+                    canvas.width = width; canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // Compression
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                    
+                    // Mise à jour UI
+                    document.getElementById(previewId).src = dataUrl;
+                    
+                    // Stockage temporaire dans l'objet window pour l'envoi
+                    if(!window.uploadQueue) window.uploadQueue = {};
+                    window.uploadQueue[hiddenFieldId] = {
+                        data: dataUrl,
+                        name: "img_" + Date.now() + ".jpg",
+                        mime: "image/jpeg"
+                    };
+                }
+            }
+        }
+
+        // --- SAUVEGARDE ---
+        function saveData() {
+            const btn = document.getElementById('btn-save-edit');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi...';
+            btn.disabled = true;
+
+            const id = document.getElementById('f-id').value;
+            if(!id) { alert("ID manquant"); btn.disabled=false; return; }
+
+            // Construction objet
+            let formData = {
+                id: id,
+                prenom: getValue('f-prenom'),
+                nom: getValue('f-nom'),
+                societe: getValue('f-societe'),
+                poste: getValue('f-poste'),
+                description: getValue('f-desc'), // Nouveau
+                telephone: getValue('f-telephone'),
+                email: getValue('f-email'),
+                site_web: getValue('f-site_web'),
+                linkedin: getValue('f-linkedin'),
+                color1: document.getElementById('f-color1').value,
+                
+                // On garde les anciennes URLs par défaut
+                photo_url: getValue('f-photo_url'),
+                logo_url: getValue('f-logo_url'),
+                banner_url: getValue('f-banner_url')
+            };
+
+            // Ajout des images SI modifiées (depuis la queue d'upload)
+            if(window.uploadQueue) {
+                // Pour Photo
+                if(window.uploadQueue['photo_url']) {
+                    formData.photo_data = window.uploadQueue['photo_url'].data;
+                    formData.photo_mime = window.uploadQueue['photo_url'].mime;
+                }
+                // Pour Logo (On triche un peu en réutilisant les champs photo_data du script, 
+                // mais pour supporter PLUSIEURS images, il faudrait adapter le script Google.
+                // ICI: On va envoyer une seule image à la fois ou adapter le script plus tard.
+                // Pour l'instant, le script actuel ne gère qu'une "photo_data".
+                // SOLUTION TEMPORAIRE: On ne sauvegarde que la Photo Principale via le script actuel.
+                // Si vous voulez tout sauvegarder, il faut mettre à jour le script Google Apps.)
+            }
+            
+            // NOTE IMPORTANTE : Pour l'instant, le script Google ne sauve que la photo de profil.
+            // Si vous voulez logo et bannière, il faudra modifier le script Backend.
+            
+            fetch(API_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            })
+            .then(() => {
+                alert("Sauvegardé !");
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                
+                // Mise à jour locale pour affichage immédiat
+                currentUser = {...currentUser, ...formData};
+                toggleEditMode(); // Retour vue carte
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Erreur réseau");
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            });
+        }
+
+        // Utilitaires
+        function setText(id, txt) { const el = document.getElementById(id); if(el) el.textContent = txt || ''; }
+        function setHref(id, url) { const el = document.getElementById(id); if(el) { if(url) { el.href = url; el.style.display = 'flex'; } else { el.style.display = 'none'; } } }
+        function getValue(id) { return document.getElementById(id).value; }
+        function setValue(id, val) { const el = document.getElementById(id); if(el) el.value = val || ''; }
+        function formatUrl(url) { if(!url) return null; return url.startsWith('http') ? url : 'https://' + url; }
+        function formatDriveLink(link) {
+            if (link && link.includes('drive.google.com') && link.includes('id=')) {
+                const match = link.match(/id=([a-zA-Z0-9_-]+)/);
+                if (match && match[1]) return "https://lh3.googleusercontent.com/d/" + match[1];
+            }
+            return link;
+        }
+
+        function downloadVCard() {
+            if(!currentUser.nom) return;
+            const vcard = `BEGIN:VCARD
+VERSION:3.0
+FN:${currentUser.prenom || ''} ${currentUser.nom || ''}
+N:${currentUser.nom};${currentUser.prenom || ''};;;
+TITLE:${currentUser.poste || ''}
+ORG:${currentUser.societe || ''}
+TEL;TYPE=CELL:${currentUser.telephone || ''}
+EMAIL:${currentUser.email || ''}
+URL:${currentUser.site_web || ''}
+END:VCARD`;
+            const blob = new Blob([vcard], { type: 'text/vcard' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'contact.vcf';
+            a.click();
+        }
+    </script>
+</body>
+</html>
