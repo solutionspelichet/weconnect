@@ -48,15 +48,24 @@
             border-bottom-left-radius: 30px;
             border-bottom-right-radius: 30px;
             display: flex;
-            justify-content: center;
-            padding-top: 20px;
+            /* Modifié pour aligner le logo en haut à gauche */
+            justify-content: flex-start; 
+            align-items: flex-start;
+            padding: 20px; /* Ajout de padding pour l'espacement */
             position: relative;
             z-index: 1;
             background-size: cover;
             background-position: center;
         }
 
-        .logo-text { color: white; font-weight: 700; font-size: 1.2rem; letter-spacing: 1px; text-transform: uppercase; }
+        .logo-text { 
+            color: white; 
+            font-weight: 700; 
+            font-size: 1.2rem; 
+            letter-spacing: 1px; 
+            text-transform: uppercase; 
+            /* S'assurer que le texte est aussi aligné si pas d'image */
+        }
 
         .profile-section {
             display: flex;
@@ -413,14 +422,20 @@
                     const user = data.find(u => u.id == userId);
                     if(user) {
                         currentUser = user;
-                        renderCard(user);
-                        fillEditor(user);
-                        if(editMode === 'true') toggleEditMode(true);
+                        // Logique de détection "Première Fois" (si nom vide)
+                        if (!user.nom && !user.prenom) {
+                            fillEditor(user);
+                            toggleEditMode(true); // Ouvre directement le mode édition
+                        } else {
+                            renderCard(user);
+                            fillEditor(user);
+                            if(editMode === 'true') toggleEditMode(true);
+                        }
                     } else {
-                        // User non trouvé, mode création ?
-                        document.getElementById('v-name').textContent = "Utilisateur inconnu";
+                        // User non trouvé, on initialise l'éditeur avec l'ID et on ouvre
                         currentUser.id = userId;
                         fillEditor(currentUser);
+                        toggleEditMode(true);
                     }
                 } catch(e) { console.error(e); }
             } else {
