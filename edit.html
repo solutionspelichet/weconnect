@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Éditeur - Ma Carte</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- J'utilise Tailwind CSS pour reproduire rapidement le style exact de vos photos -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f4ff; }
+        .input-field {
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s;
+        }
+        .input-field:focus {
+            border-color: #2563eb;
+            ring: 2px solid #2563eb;
+            outline: none;
+        }
+        /* Style pour l'accordéon */
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .accordion-open {
+            max-height: 1000px; /* Valeur arbitraire haute */
+        }
+        .chevron-rotate {
+            transform: rotate(180deg);
+        }
+    </style>
+</head>
+<body class="bg-[#eff6ff] min-h-screen flex justify-center pb-24">
+
+    <!-- Container Mobile -->
+    <div class="w-full max-w-md bg-[#eff6ff] min-h-screen relative">
+        
+        <!-- Header Noir -->
+        <div class="bg-black text-white px-6 py-4 flex justify-between items-center rounded-b-[2rem] mb-6 shadow-lg relative z-10">
+            <i class="fas fa-bars text-xl"></i>
+            <span class="font-bold text-lg tracking-wider">WEMET</span>
+            <div class="w-6"></div> <!-- Spacer pour centrer le logo -->
+        </div>
+
+        <!-- Titre -->
+        <div class="px-6 mb-4">
+            <h1 class="text-2xl font-bold text-gray-900">Ma carte</h1>
+        </div>
+
+        <!-- Sélecteur de profil (Simulation) -->
+        <div class="px-6 mb-6">
+            <div class="bg-[#2563eb] text-white p-3 rounded-lg flex justify-between items-center cursor-pointer shadow-md">
+                <span class="font-medium" id="header-name">Chargement...</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+        </div>
+
+        <!-- Formulaire -->
+        <form id="profileForm" class="px-4 flex flex-col gap-4">
+            
+            <!-- Champ caché pour l'ID -->
+            <input type="hidden" id="field-id" name="id">
+
+            <!-- Section Apparence (Repliée pour l'exemple) -->
+            <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+                <button type="button" class="w-full p-4 flex justify-between items-center font-bold text-[#1e3a8a]" onclick="toggleAccordion('acc-apparence')">
+                    <span>Apparence</span>
+                    <i id="icon-acc-apparence" class="fas fa-chevron-circle-down text-black text-xl transition-transform duration-300"></i>
+                </button>
+            </div>
+
+            <!-- Section Informations (Celle des photos) -->
+            <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+                <button type="button" class="w-full p-4 flex justify-between items-center font-bold text-[#1e3a8a]" onclick="toggleAccordion('acc-infos')">
+                    <span>Informations</span>
+                    <i id="icon-acc-infos" class="fas fa-chevron-circle-down text-black text-xl transition-transform duration-300 chevron-rotate"></i>
+                </button>
+                
+                <div id="acc-infos" class="accordion-content accordion-open px-5 pb-6">
+                    
+                    <div class="space-y-4 pt-2">
+                        <!-- Nom -->
+                        <div>
+                            <label class="block text-[#2563eb] font-bold mb-1 text-sm">Nom*</label>
+                            <input type="text" id="field-nom" name="nom" class="input-field w-full p-3 rounded-xl border border-gray-200 text-gray-700 bg-white" placeholder="Votre nom">
+                        </div>
+
+                        <!-- Société -->
+                        <div>
+                            <label class="block text-[#2563eb] font-bold mb-1 text-sm">Société</label>
+                            <input type="text" id="field-societe" name="societe" class="input-field w-full p-3 rounded-xl border border-gray-200 text-gray-700 bg-white" placeholder="Votre entreprise">
+                        </div>
+
+                        <!-- Poste -->
+                        <div>
+                            <label class="block text-[#2563eb] font-bold mb-1 text-sm">Poste</label>
+                            <input type="text" id="field-poste" name="poste" class="input-field w-full p-3 rounded-xl border border-gray-200 text-gray-700 bg-white" placeholder="Votre poste">
+                        </div>
+
+                        <!-- Téléphone -->
+                        <div>
+                            <label class="block text-[#2563eb] font-bold mb-1 text-sm">Téléphone</label>
+                            <input type="tel" id="field-telephone" name="telephone" class="input-field w-full p-3 rounded-xl border border-gray-200 text-gray-700 bg-white" placeholder="+33 6...">
+                        </div>
+
+                        <!-- Email -->
+                        <div>
+                            <label class="block text-[#2563eb] font-bold mb-1 text-sm">E-mail*</label>
+                            <input type="email" id="field-email" name="email" class="input-field w-full p-3 rounded-xl border border-gray-200 text-gray-700 bg-white" placeholder="exemple@email.com">
+                        </div>
+
+                         <!-- Site Web -->
+                         <div>
+                            <label class="block text-[#2563eb] font-bold mb-1 text-sm">Site Web</label>
+                            <input type="text" id="field-site_web" name="site_web" class="input-field w-full p-3 rounded-xl border border-gray-200 text-gray-700 bg-white" placeholder="www.monsite.com">
+                        </div>
+                        
+                        <!-- URL Photo -->
+                         <div>
+                            <label class="block text-[#2563eb] font-bold mb-1 text-sm">Lien Photo Profil</label>
+                            <input type="text" id="field-photo_url" name="photo_url" class="input-field w-full p-3 rounded-xl border border-gray-200 text-gray-700 bg-white" placeholder="https://...">
+                            <p class="text-xs text-gray-400 mt-1">Collez ici le lien direct vers votre photo.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Section Widgets -->
+            <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+                <button type="button" class="w-full p-4 flex justify-between items-center font-bold text-[#1e3a8a]" onclick="toggleAccordion('acc-widgets')">
+                    <span>Widgets</span>
+                    <i id="icon-acc-widgets" class="fas fa-chevron-circle-down text-black text-xl transition-transform duration-300"></i>
+                </button>
+            </div>
+
+        </form>
+
+        <!-- Barre d'action fixe en bas -->
+        <div class="fixed bottom-0 left-0 right-0 bg-white p-4 flex gap-4 border-t border-gray-100 items-center justify-center z-50">
+            <button class="bg-white text-[#2563eb] font-bold py-3 px-6 rounded-xl border border-gray-100 shadow-sm w-1/3">
+                Aperçu
+            </button>
+            <button onclick="saveData()" id="btn-save" class="bg-[#2563eb] text-white font-bold py-3 px-6 rounded-xl shadow-md w-2/3 flex justify-center items-center gap-2">
+                Sauvegarder
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Notification -->
+    <div id="toast" class="fixed top-5 left-1/2 transform -translate-x-1/2 bg-black text-white px-6 py-3 rounded-full shadow-lg opacity-0 transition-opacity duration-300 pointer-events-none z-50">
+        Sauvegarde réussie !
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        const API_URL = 'https://script.google.com/macros/s/AKfycbz12V16okyQngAw7QCUeRZNsbI4jy5aH4vfSk-kxL3jl1Dl3P-f0pAxlX0CKtQgZnGE8A/exec'; 
+        
+        // Récupérer l'ID dans l'URL (ex: admin.html?id=arnaud1)
+        const urlParams = new URLSearchParams(window.location.search);
+        // Si pas d'ID, on en génère un aléatoire ou on demande à l'user (pour la démo on met 'test')
+        const userId = urlParams.get('id') || 'nouvel_utilisateur';
+
+        // Initialisation
+        window.onload = async function() {
+            document.getElementById('field-id').value = userId;
+            document.getElementById('header-name').textContent = userId;
+
+            // Charger les données existantes si c'est une modif
+            if(API_URL && userId !== 'nouvel_utilisateur') {
+               try {
+                   const response = await fetch(API_URL);
+                   const data = await response.json();
+                   const user = data.find(u => u.id == userId);
+                   if(user) {
+                       // Remplir les champs
+                       document.getElementById('field-nom').value = user.nom || '';
+                       document.getElementById('field-societe').value = user.societe || ''; // Note: ajoutez cette colonne dans votre Sheet
+                       document.getElementById('field-poste').value = user.poste || '';
+                       document.getElementById('field-telephone').value = user.telephone || '';
+                       document.getElementById('field-email').value = user.email || '';
+                       document.getElementById('field-site_web').value = user.site_web || '';
+                       document.getElementById('field-photo_url').value = user.photo_url || '';
+                       
+                       document.getElementById('header-name').textContent = user.nom;
+                   }
+               } catch(e) {
+                   console.log("Erreur chargement", e);
+               }
+            }
+        };
+
+        // Fonction Accordéon
+        function toggleAccordion(id) {
+            const el = document.getElementById(id);
+            const icon = document.getElementById('icon-' + id);
+            
+            if (el.classList.contains('accordion-open')) {
+                el.classList.remove('accordion-open');
+                icon.classList.remove('chevron-rotate');
+            } else {
+                el.classList.add('accordion-open');
+                icon.classList.add('chevron-rotate');
+            }
+        }
+
+        // Fonction Sauvegarder
+        function saveData() {
+            const btn = document.getElementById('btn-save');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi...';
+            btn.disabled = true;
+
+            // Récupération des données du formulaire
+            const formData = {
+                id: document.getElementById('field-id').value,
+                nom: document.getElementById('field-nom').value,
+                societe: document.getElementById('field-societe').value,
+                poste: document.getElementById('field-poste').value,
+                telephone: document.getElementById('field-telephone').value,
+                email: document.getElementById('field-email').value,
+                site_web: document.getElementById('field-site_web').value,
+                photo_url: document.getElementById('field-photo_url').value,
+            };
+
+            // Envoi vers Google Sheets (via Apps Script)
+            fetch(API_URL, {
+                method: 'POST',
+                mode: 'no-cors', // Important pour éviter les erreurs CORS avec Google Script simple
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => {
+                // Avec mode: 'no-cors', on ne peut pas lire la réponse JSON, 
+                // mais si ça ne plante pas, c'est que la requête est partie.
+                showToast("Informations sauvegardées !");
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                showToast("Erreur lors de la sauvegarde.");
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.remove('opacity-0');
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+            }, 3000);
+        }
+
+    </script>
+</body>
+</html>
