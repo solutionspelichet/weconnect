@@ -3,262 +3,267 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Éditeur - Ma Carte</title>
+    <title>Éditeur - Weconnect</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <!-- J'utilise Tailwind CSS pour reproduire rapidement le style exact de vos photos -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f4ff; }
-        .input-field {
-            border: 1px solid #e5e7eb;
-            transition: all 0.3s;
+        body { background-color: #f0f4ff; font-family: sans-serif; }
+        /* Accordéon simple : par défaut caché, si classe 'show' ajoutée, on affiche */
+        .accordion-body {
+            display: none;
+            padding: 1rem;
         }
-        .input-field:focus {
-            border-color: #2563eb;
-            ring: 2px solid #2563eb;
-            outline: none;
+        .accordion-body.show {
+            display: block;
+            animation: slideDown 0.3s ease-out;
         }
-        /* Style pour l'accordéon */
-        .accordion-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
-        }
-        .accordion-open {
-            max-height: 1000px; /* Valeur arbitraire haute */
-        }
-        .chevron-rotate {
-            transform: rotate(180deg);
-        }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .input-group { margin-bottom: 1rem; }
+        .input-label { display: block; color: #2563eb; font-weight: bold; margin-bottom: 0.25rem; font-size: 0.9rem; }
+        .input-field { width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #d1d5db; }
+        .input-field:focus { outline: none; border-color: #2563eb; ring: 2px solid #2563eb; }
     </style>
 </head>
-<body class="bg-[#eff6ff] min-h-screen flex justify-center pb-24">
+<body class="flex justify-center min-h-screen pb-20">
 
-    <!-- Container Mobile -->
-    <div class="w-full max-w-md bg-[#eff6ff] min-h-screen relative">
+    <div class="w-full max-w-md bg-[#eff6ff] relative shadow-xl min-h-screen">
         
-        <!-- Header Noir -->
-        <div class="bg-black text-white px-6 py-4 flex justify-between items-center rounded-b-[2rem] mb-6 shadow-lg relative z-10">
+        <!-- Header -->
+        <div class="bg-black text-white px-6 py-6 rounded-b-[2rem] mb-6 flex justify-between items-center shadow-lg">
             <i class="fas fa-bars text-xl"></i>
-            <span class="font-bold text-lg tracking-wider">WEMET</span>
-            <div class="w-6"></div> <!-- Spacer pour centrer le logo -->
+            <span class="font-bold text-lg tracking-widest">WEMET</span>
+            <div class="w-6"></div>
         </div>
 
-        <!-- Titre -->
-        <div class="px-6 mb-4">
-            <h1 class="text-2xl font-bold text-gray-900">Ma carte</h1>
-        </div>
-
-        <!-- Sélecteur de profil (Simulation) -->
+        <h1 class="text-2xl font-bold text-gray-900 px-6 mb-2">Ma carte</h1>
+        
+        <!-- Identifiant (ID) - Création de compte -->
         <div class="px-6 mb-6">
-            <div class="bg-[#2563eb] text-white p-3 rounded-lg flex justify-between items-center cursor-pointer shadow-md">
-                <span class="font-medium" id="header-name">Chargement...</span>
-                <i class="fas fa-chevron-down"></i>
+            <label class="text-xs text-gray-500 uppercase font-bold ml-1">Identifiant Unique (ID)</label>
+            <div class="bg-white p-2 rounded-xl border border-blue-200 flex items-center shadow-sm">
+                <span class="text-gray-400 pl-2 text-sm">id:</span>
+                <input type="text" id="field-id" class="w-full p-2 outline-none font-bold text-gray-700" placeholder="ex: jean.dupont">
             </div>
+            <p class="text-xs text-gray-400 mt-1 ml-1"><i class="fas fa-info-circle"></i> Changez ceci pour créer un nouvel utilisateur.</p>
         </div>
 
-        <!-- Formulaire -->
-        <form id="profileForm" class="px-4 flex flex-col gap-4">
-            
-            <!-- Champ caché pour l'ID -->
-            <input type="hidden" id="field-id" name="id">
+        <form id="profileForm" class="px-4 flex flex-col gap-3">
 
-            <!-- Section Apparence (Repliée pour l'exemple) -->
+            <!-- 1. Apparence (Photo) -->
             <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-                <button type="button" class="w-full p-4 flex justify-between items-center font-bold text-[#1e3a8a]" onclick="toggleAccordion('acc-apparence')">
-                    <span>Apparence</span>
-                    <i id="icon-acc-apparence" class="fas fa-chevron-circle-down text-black text-xl transition-transform duration-300"></i>
+                <button type="button" class="w-full p-4 flex justify-between items-center font-bold text-[#1e3a8a] bg-white" onclick="toggleAcc('acc-apparence')">
+                    <span><i class="fas fa-camera mr-2"></i> Apparence & Photo</span>
+                    <i class="fas fa-chevron-down"></i>
                 </button>
-            </div>
-
-            <!-- Section Informations (Celle des photos) -->
-            <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-                <button type="button" class="w-full p-4 flex justify-between items-center font-bold text-[#1e3a8a]" onclick="toggleAccordion('acc-infos')">
-                    <span>Informations</span>
-                    <i id="icon-acc-infos" class="fas fa-chevron-circle-down text-black text-xl transition-transform duration-300 chevron-rotate"></i>
-                </button>
-                
-                <div id="acc-infos" class="accordion-content accordion-open px-5 pb-6">
+                <div id="acc-apparence" class="accordion-body show"> <!-- 'show' par défaut pour qu'on le voie -->
                     
-                    <div class="space-y-4 pt-2">
-                        <!-- Nom -->
-                        <div>
-                            <label class="block text-[#2563eb] font-bold mb-1 text-sm">Nom*</label>
-                            <input type="text" id="field-nom" name="nom" class="input-field w-full p-3 rounded-xl border border-gray-200 text-gray-700 bg-white" placeholder="Votre nom">
-                        </div>
-
-                        <!-- Société -->
-                        <div>
-                            <label class="block text-[#2563eb] font-bold mb-1 text-sm">Société</label>
-                            <input type="text" id="field-societe" name="societe" class="input-field w-full p-3 rounded-xl border border-gray-200 text-gray-700 bg-white" placeholder="Votre entreprise">
-                        </div>
-
-                        <!-- Poste -->
-                        <div>
-                            <label class="block text-[#2563eb] font-bold mb-1 text-sm">Poste</label>
-                            <input type="text" id="field-poste" name="poste" class="input-field w-full p-3 rounded-xl border border-gray-200 text-gray-700 bg-white" placeholder="Votre poste">
-                        </div>
-
-                        <!-- Téléphone -->
-                        <div>
-                            <label class="block text-[#2563eb] font-bold mb-1 text-sm">Téléphone</label>
-                            <input type="tel" id="field-telephone" name="telephone" class="input-field w-full p-3 rounded-xl border border-gray-200 text-gray-700 bg-white" placeholder="+33 6...">
-                        </div>
-
-                        <!-- Email -->
-                        <div>
-                            <label class="block text-[#2563eb] font-bold mb-1 text-sm">E-mail*</label>
-                            <input type="email" id="field-email" name="email" class="input-field w-full p-3 rounded-xl border border-gray-200 text-gray-700 bg-white" placeholder="exemple@email.com">
-                        </div>
-
-                         <!-- Site Web -->
-                         <div>
-                            <label class="block text-[#2563eb] font-bold mb-1 text-sm">Site Web</label>
-                            <input type="text" id="field-site_web" name="site_web" class="input-field w-full p-3 rounded-xl border border-gray-200 text-gray-700 bg-white" placeholder="www.monsite.com">
-                        </div>
-                        
-                        <!-- URL Photo -->
-                         <div>
-                            <label class="block text-[#2563eb] font-bold mb-1 text-sm">Lien Photo Profil</label>
-                            <input type="text" id="field-photo_url" name="photo_url" class="input-field w-full p-3 rounded-xl border border-gray-200 text-gray-700 bg-white" placeholder="https://...">
-                            <p class="text-xs text-gray-400 mt-1">Collez ici le lien direct vers votre photo.</p>
-                        </div>
+                    <!-- Upload Photo -->
+                    <div class="flex flex-col items-center gap-4 mb-4">
+                        <img id="preview-photo" src="https://via.placeholder.com/100" class="w-24 h-24 rounded-full border-4 border-blue-100 object-cover shadow-md">
+                        <label class="bg-blue-100 text-blue-600 px-4 py-2 rounded-full cursor-pointer font-bold text-sm hover:bg-blue-200 transition">
+                            <i class="fas fa-upload mr-1"></i> Choisir une photo
+                            <input type="file" id="photo-upload" class="hidden" accept="image/*" onchange="previewImage(event)">
+                        </label>
+                        <!-- Champ caché pour stocker l'URL existante -->
+                        <input type="hidden" id="field-photo_url"> 
                     </div>
 
                 </div>
             </div>
 
-            <!-- Section Widgets -->
+            <!-- 2. Informations -->
             <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-                <button type="button" class="w-full p-4 flex justify-between items-center font-bold text-[#1e3a8a]" onclick="toggleAccordion('acc-widgets')">
-                    <span>Widgets</span>
-                    <i id="icon-acc-widgets" class="fas fa-chevron-circle-down text-black text-xl transition-transform duration-300"></i>
+                <button type="button" class="w-full p-4 flex justify-between items-center font-bold text-[#1e3a8a] bg-white" onclick="toggleAcc('acc-infos')">
+                    <span><i class="fas fa-user mr-2"></i> Informations</span>
+                    <i class="fas fa-chevron-down"></i>
                 </button>
+                <div id="acc-infos" class="accordion-body show">
+                    
+                    <div class="grid grid-cols-2 gap-3 mb-3">
+                        <div>
+                            <label class="input-label">Prénom</label>
+                            <input type="text" id="field-prenom" class="input-field" placeholder="Jean">
+                        </div>
+                        <div>
+                            <label class="input-label">Nom</label>
+                            <input type="text" id="field-nom" class="input-field" placeholder="Dupont">
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">Société</label>
+                        <input type="text" id="field-societe" class="input-field" placeholder="Votre entreprise">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Poste</label>
+                        <input type="text" id="field-poste" class="input-field" placeholder="Directeur...">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Téléphone</label>
+                        <input type="tel" id="field-telephone" class="input-field" placeholder="+33 6...">
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Email</label>
+                        <input type="email" id="field-email" class="input-field" placeholder="jean@email.com">
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- 3. Réseaux Sociaux -->
+            <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+                <button type="button" class="w-full p-4 flex justify-between items-center font-bold text-[#1e3a8a] bg-white" onclick="toggleAcc('acc-widgets')">
+                    <span><i class="fas fa-share-alt mr-2"></i> Réseaux & Liens</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div id="acc-widgets" class="accordion-body">
+                    
+                    <div class="input-group">
+                        <label class="input-label"><i class="fab fa-linkedin text-blue-700"></i> LinkedIn</label>
+                        <input type="text" id="field-linkedin" class="input-field" placeholder="Lien profil LinkedIn">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="input-label"><i class="fas fa-globe text-gray-600"></i> Site Web</label>
+                        <input type="text" id="field-site_web" class="input-field" placeholder="www.monsite.com">
+                    </div>
+
+                </div>
             </div>
 
         </form>
 
-        <!-- Barre d'action fixe en bas -->
-        <div class="fixed bottom-0 left-0 right-0 bg-white p-4 flex gap-4 border-t border-gray-100 items-center justify-center z-50">
-            <button class="bg-white text-[#2563eb] font-bold py-3 px-6 rounded-xl border border-gray-100 shadow-sm w-1/3">
-                Aperçu
-            </button>
-            <button onclick="saveData()" id="btn-save" class="bg-[#2563eb] text-white font-bold py-3 px-6 rounded-xl shadow-md w-2/3 flex justify-center items-center gap-2">
+        <!-- Bouton Sauvegarder Fixe -->
+        <div class="fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-gray-200 z-50 flex justify-center">
+            <button onclick="saveData()" id="btn-save" class="bg-[#2563eb] hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full shadow-lg w-full max-w-sm transition-all flex justify-center items-center gap-2">
                 Sauvegarder
             </button>
         </div>
 
     </div>
 
-    <!-- Notification -->
-    <div id="toast" class="fixed top-5 left-1/2 transform -translate-x-1/2 bg-black text-white px-6 py-3 rounded-full shadow-lg opacity-0 transition-opacity duration-300 pointer-events-none z-50">
-        Sauvegarde réussie !
-    </div>
-
+    <!-- Script de logique -->
     <script>
-        // --- CONFIGURATION ---
-        const API_URL = 'https://script.google.com/macros/s/AKfycbz12V16okyQngAw7QCUeRZNsbI4jy5aH4vfSk-kxL3jl1Dl3P-f0pAxlX0CKtQgZnGE8A/exec'; 
-        
-        // Récupérer l'ID dans l'URL (ex: admin.html?id=arnaud1)
-        const urlParams = new URLSearchParams(window.location.search);
-        // Si pas d'ID, on en génère un aléatoire ou on demande à l'user (pour la démo on met 'test')
-        const userId = urlParams.get('id') || 'nouvel_utilisateur';
+        // CONFIGURATION
+        const API_URL = 'Vhttps://solutionspelichet.github.io/weconnect'; // <-- COLLEZ L'URL ICI
 
-        // Initialisation
+        // Gestion Accordéons
+        function toggleAcc(id) {
+            document.getElementById(id).classList.toggle('show');
+        }
+
+        // Prévisualisation image
+        function previewImage(event) {
+            const reader = new FileReader();
+            reader.onload = function(){
+                document.getElementById('preview-photo').src = reader.result;
+            }
+            if(event.target.files[0]) reader.readAsDataURL(event.target.files[0]);
+        }
+
+        // Chargement Données
         window.onload = async function() {
-            document.getElementById('field-id').value = userId;
-            document.getElementById('header-name').textContent = userId;
+            const urlParams = new URLSearchParams(window.location.search);
+            const userId = urlParams.get('id');
 
-            // Charger les données existantes si c'est une modif
-            if(API_URL && userId !== 'nouvel_utilisateur') {
-               try {
-                   const response = await fetch(API_URL);
-                   const data = await response.json();
-                   const user = data.find(u => u.id == userId);
-                   if(user) {
-                       // Remplir les champs
-                       document.getElementById('field-nom').value = user.nom || '';
-                       document.getElementById('field-societe').value = user.societe || ''; // Note: ajoutez cette colonne dans votre Sheet
-                       document.getElementById('field-poste').value = user.poste || '';
-                       document.getElementById('field-telephone').value = user.telephone || '';
-                       document.getElementById('field-email').value = user.email || '';
-                       document.getElementById('field-site_web').value = user.site_web || '';
-                       document.getElementById('field-photo_url').value = user.photo_url || '';
-                       
-                       document.getElementById('header-name').textContent = user.nom;
-                   }
-               } catch(e) {
-                   console.log("Erreur chargement", e);
-               }
+            if(userId) {
+                document.getElementById('field-id').value = userId;
+                if(API_URL) {
+                    try {
+                        // Petit effet visuel chargement
+                        document.getElementById('field-nom').placeholder = "Chargement...";
+                        
+                        const response = await fetch(API_URL);
+                        const data = await response.json();
+                        const user = data.find(u => u.id == userId);
+                        
+                        if(user) {
+                            // Remplissage des champs
+                            const fields = ['prenom', 'nom', 'societe', 'poste', 'telephone', 'email', 'site_web', 'linkedin', 'photo_url'];
+                            fields.forEach(f => {
+                                if(document.getElementById('field-'+f)) {
+                                    document.getElementById('field-'+f).value = user[f] || '';
+                                }
+                            });
+                            // Aperçu photo
+                            if(user.photo_url) document.getElementById('preview-photo').src = user.photo_url;
+                        }
+                    } catch(e) { console.error(e); }
+                }
+            } else {
+                // Générer un ID aléatoire si vide
+                document.getElementById('field-id').value = "user_" + Math.floor(Math.random() * 10000);
             }
         };
 
-        // Fonction Accordéon
-        function toggleAccordion(id) {
-            const el = document.getElementById(id);
-            const icon = document.getElementById('icon-' + id);
-            
-            if (el.classList.contains('accordion-open')) {
-                el.classList.remove('accordion-open');
-                icon.classList.remove('chevron-rotate');
-            } else {
-                el.classList.add('accordion-open');
-                icon.classList.add('chevron-rotate');
-            }
-        }
-
-        // Fonction Sauvegarder
+        // Sauvegarde avec Gestion de Fichier
         function saveData() {
             const btn = document.getElementById('btn-save');
             const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi...';
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Envoi...';
             btn.disabled = true;
 
-            // Récupération des données du formulaire
-            const formData = {
-                id: document.getElementById('field-id').value,
+            const id = document.getElementById('field-id').value;
+            if(!id) { alert("L'identifiant est obligatoire"); btn.disabled=false; btn.innerHTML=originalText; return; }
+
+            // 1. Préparer l'objet JSON
+            let formData = {
+                id: id,
+                prenom: document.getElementById('field-prenom').value,
                 nom: document.getElementById('field-nom').value,
                 societe: document.getElementById('field-societe').value,
                 poste: document.getElementById('field-poste').value,
                 telephone: document.getElementById('field-telephone').value,
                 email: document.getElementById('field-email').value,
                 site_web: document.getElementById('field-site_web').value,
-                photo_url: document.getElementById('field-photo_url').value,
+                linkedin: document.getElementById('field-linkedin').value,
+                photo_url: document.getElementById('field-photo_url').value // Garde l'ancienne URL si pas de nouvelle
             };
 
-            // Envoi vers Google Sheets (via Apps Script)
+            // 2. Vérifier si une nouvelle photo est sélectionnée
+            const fileInput = document.getElementById('photo-upload');
+            if (fileInput.files.length > 0) {
+                const reader = new FileReader();
+                reader.readAsDataURL(fileInput.files[0]);
+                reader.onload = function () {
+                    // On ajoute les données de la photo au JSON
+                    formData.photo_data = reader.result; // Base64 complet
+                    formData.photo_name = fileInput.files[0].name;
+                    formData.photo_mime = fileInput.files[0].type;
+                    sendDataToScript(formData, btn, originalText);
+                };
+                reader.onerror = function (error) {
+                    console.log('Error: ', error);
+                    alert("Erreur lecture image");
+                    btn.disabled = false;
+                };
+            } else {
+                // Pas de photo, on envoie direct
+                sendDataToScript(formData, btn, originalText);
+            }
+        }
+
+        function sendDataToScript(data, btn, originalText) {
             fetch(API_URL, {
                 method: 'POST',
-                mode: 'no-cors', // Important pour éviter les erreurs CORS avec Google Script simple
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData)
+                mode: 'no-cors', // Important pour Google Apps Script
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
             })
-            .then(response => {
-                // Avec mode: 'no-cors', on ne peut pas lire la réponse JSON, 
-                // mais si ça ne plante pas, c'est que la requête est partie.
-                showToast("Informations sauvegardées !");
+            .then(() => {
+                alert("Sauvegardé avec succès ! Vérifiez vos emails.");
                 btn.innerHTML = originalText;
                 btn.disabled = false;
+                // Optionnel : recharger la page avec le bon ID si on vient de le changer
+                // window.location.search = "?id=" + data.id;
             })
-            .catch(error => {
-                console.error('Erreur:', error);
-                showToast("Erreur lors de la sauvegarde.");
-                btn.innerHTML = originalText;
+            .catch(err => {
+                console.error(err);
+                alert("Erreur réseau");
                 btn.disabled = false;
             });
         }
-
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.classList.remove('opacity-0');
-            setTimeout(() => {
-                toast.classList.add('opacity-0');
-            }, 3000);
-        }
-
     </script>
 </body>
 </html>
