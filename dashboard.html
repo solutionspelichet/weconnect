@@ -48,24 +48,16 @@
             border-bottom-left-radius: 30px;
             border-bottom-right-radius: 30px;
             display: flex;
-            /* Modifié pour aligner le logo en haut à gauche */
             justify-content: flex-start; 
             align-items: flex-start;
-            padding: 20px; /* Ajout de padding pour l'espacement */
+            padding: 20px;
             position: relative;
             z-index: 1;
             background-size: cover;
             background-position: center;
         }
 
-        .logo-text { 
-            color: white; 
-            font-weight: 700; 
-            font-size: 1.2rem; 
-            letter-spacing: 1px; 
-            text-transform: uppercase; 
-            /* S'assurer que le texte est aussi aligné si pas d'image */
-        }
+        .logo-text { color: white; font-weight: 700; font-size: 1.2rem; letter-spacing: 1px; text-transform: uppercase; }
 
         .profile-section {
             display: flex;
@@ -316,6 +308,15 @@
                     <input type="text" id="f-poste" class="form-input" placeholder="Directeur...">
                 </div>
             </div>
+
+            <!-- BOUTON RENVOYER EMAIL -->
+            <div class="edit-card bg-blue-50 border border-blue-100">
+                <h3 class="font-bold text-sm mb-2 text-blue-800">Accès & Sécurité</h3>
+                <p class="text-xs text-gray-600 mb-3">Si vous avez perdu votre lien d'édition, renvoyez-le sur votre email.</p>
+                <button onclick="resendEmail()" id="btn-resend" class="w-full bg-white border border-blue-200 text-blue-600 font-bold py-2 rounded-lg hover:bg-blue-50 transition text-sm">
+                    <i class="fas fa-paper-plane mr-2"></i> Renvoyer mes accès par email
+                </button>
+            </div>
         </div>
 
         <!-- Contenu Onglet : APPARENCE -->
@@ -516,7 +517,7 @@
             // Activer la cible
             document.getElementById(tabId).classList.add('active');
             // Trouver l'onglet cliqué et l'activer (via l'event courant)
-            event.currentTarget.classList.add('active');
+            if (event) event.currentTarget.classList.add('active');
         }
 
         function fillEditor(data) {
@@ -659,6 +660,45 @@
                 alert("Erreur réseau");
                 btn.disabled = false;
                 btn.innerHTML = originalText;
+            });
+        }
+
+        // --- NOUVELLE FONCTION POUR RENVOYER L'EMAIL ---
+        function resendEmail() {
+            const btn = document.getElementById('btn-resend');
+            const originalText = btn.innerHTML;
+            const email = getValue('f-email');
+            
+            if(!email) {
+                alert("Veuillez d'abord renseigner une adresse email et sauvegarder.");
+                return;
+            }
+
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi...';
+            btn.disabled = true;
+
+            const payload = {
+                id: currentUser.id,
+                email: email,
+                send_email: true // Force l'envoi côté backend
+            };
+
+            fetch(API_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(() => {
+                alert("Email envoyé avec succès ! Vérifiez votre boîte de réception.");
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Erreur réseau.");
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             });
         }
 
