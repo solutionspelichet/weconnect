@@ -1,149 +1,275 @@
-// --- CONFIGURATION ---
-const BASE_URL = "https://solutionspelichet.github.io/weconnect"; // Mettez votre URL GitHub
-const NOM_FEUILLE = "DonneesCartes";
-const NOM_DOSSIER_DRIVE = "Wemet_Photos"; // Dossier où iront les images
-
-// --- 1. INITIALISATION ---
-function SETUP_INITIALISATION() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName(NOM_FEUILLE);
-
-  if (!sheet) {
-    sheet = ss.insertSheet(NOM_FEUILLE);
-    // Supprimer la feuille par défaut si vide
-    try { ss.deleteSheet(ss.getSheetByName('Feuille 1')); } catch(e){}
-  }
-
-  // NOUVELLES COLONNES AJOUTÉES : prenom, linkedin
-  var headers = ['id', 'prenom', 'nom', 'societe', 'poste', 'telephone', 'email', 'site_web', 'linkedin', 'photo_url'];
-
-  // Si on a moins de colonnes que prévu ou feuille vide, on met à jour
-  if (sheet.getLastRow() === 0 || sheet.getLastColumn() < headers.length) {
-    // On efface et on remet les headers pour être sûr
-    sheet.getRange(1, 1, 1, sheet.getLastColumn() || 1).clearContent();
-    sheet.appendRow(headers);
-    sheet.setFrozenRows(1);
-    sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold').setBackground('#e0e0e0');
-    Logger.log("✅ Colonnes mises à jour avec Prénom et LinkedIn !");
-  }
-}
-
-function getSheet() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getSheetByName(NOM_FEUILLE);
-  if (!sheet) { SETUP_INITIALISATION(); return ss.getSheetByName(NOM_FEUILLE); }
-  return sheet;
-}
-
-// --- 2. GESTION DRIVE (POUR LES PHOTOS) ---
-function getOrCreateFolder() {
-  var folders = DriveApp.getFoldersByName(NOM_DOSSIER_DRIVE);
-  if (folders.hasNext()) {
-    return folders.next();
-  } else {
-    return DriveApp.createFolder(NOM_DOSSIER_DRIVE);
-  }
-}
-
-// --- 3. API LECTURE (GET) ---
-function doGet(e) {
-  var sheet = getSheet();
-  var rows = sheet.getDataRange().getValues();
-  var headers = rows[0];
-  var data = [];
-
-  for (var i = 1; i < rows.length; i++) {
-    var row = rows[i];
-    var record = {};
-    for (var j = 0; j < headers.length; j++) {
-      record[headers[j]] = row[j];
-    }
-    data.push(record);
-  }
-
-  return ContentService.createTextOutput(JSON.stringify(data))
-    .setMimeType(ContentService.MimeType.JSON);
-}
-
-// --- 4. API ÉCRITURE (POST) ---
-function doPost(e) {
-  try {
-    var sheet = getSheet();
-    var params = JSON.parse(e.postData.contents);
-    var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ma Carte Digitale</title>
+    <!-- Icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Police Google Fonts (Inter pour un look moderne comme WeMet) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     
-    // -- GESTION PHOTO (UPLOAD) --
-    if (params.photo_data && params.photo_name) {
-      try {
-        var folder = getOrCreateFolder();
-        var data = Utilities.base64Decode(params.photo_data.split(',')[1]); // Enlever le header base64
-        var blob = Utilities.newBlob(data, params.photo_mime, "photo_" + params.id + "_" + new Date().getTime());
-        var file = folder.createFile(blob);
-        file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-        
-        // On génère le lien d'affichage direct
-        params.photo_url = "https://drive.google.com/uc?export=view&id=" + file.getId();
-      } catch (err) {
-        // Si erreur upload, on garde l'ancienne URL si elle existe
-      }
-    }
-
-    // -- SAUVEGARDE DONNÉES --
-    var rows = sheet.getDataRange().getValues();
-    var rowIndex = -1;
-    
-    // On cherche si l'ID existe
-    for (var i = 1; i < rows.length; i++) {
-      if (rows[i][0] == params.id) {
-        rowIndex = i + 1;
-        break;
-      }
-    }
-
-    if (rowIndex === -1) {
-      // NOUVEAU : Si ID non trouvé, on crée une nouvelle ligne
-      var newRow = [];
-      headers.forEach(function(header) {
-        newRow.push(params[header] || "");
-      });
-      sheet.appendRow(newRow);
-    } else {
-      // UPDATE : Si ID trouvé, on met à jour
-      headers.forEach(function(header, colIndex) {
-        // On ne met à jour que si la donnée est envoyée (pour ne pas effacer la photo si pas de nouvelle upload)
-        if (params[header] !== undefined && params[header] !== "") {
-           sheet.getRange(rowIndex, colIndex + 1).setValue(params[header]);
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-main: #111827;
+            --text-sub: #6b7280;
+            --header-bg: #000000;
         }
-      });
-    }
 
-    // Liens pour l'email
-    var publicLink = BASE_URL + "/?id=" + params.id;
-    var editLink = BASE_URL + "/admin.html?id=" + params.id;
-    var qrCodeUrl = "https://quickchart.io/qr?text=" + encodeURIComponent(publicLink) + "&size=300";
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            color: var(--text-main);
+        }
 
-    // Envoi Email
-    if (params.email) {
-      sendConfirmationEmail(params.email, params.prenom || params.nom, publicLink, editLink, qrCodeUrl);
-    }
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            background-color: var(--card-bg);
+            min-height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+        }
 
-    return ContentService.createTextOutput(JSON.stringify({"result": "success", "photo_url": params.photo_url}))
-      .setMimeType(ContentService.MimeType.JSON);
+        .header {
+            background-color: var(--header-bg);
+            height: 140px;
+            width: 100%;
+            border-bottom-left-radius: 30px;
+            border-bottom-right-radius: 30px;
+            display: flex;
+            justify-content: center;
+            padding-top: 20px;
+            position: relative;
+            z-index: 1;
+        }
 
-  } catch (error) {
-    return ContentService.createTextOutput(JSON.stringify({"result": "error", "message": error.message}))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-}
+        .logo { color: white; font-weight: 700; font-size: 1.2rem; letter-spacing: 1px; text-transform: uppercase; }
 
-function sendConfirmationEmail(email, name, publicLink, editLink, qrCodeUrl) {
-  var htmlBody = `
-    <div style="font-family: sans-serif; border: 1px solid #ccc; padding: 20px; border-radius: 10px;">
-      <h2 style="color:#2563eb">Carte mise à jour !</h2>
-      <p>Bonjour ${name},</p>
-      <p>Voici votre lien : <a href="${publicLink}">${publicLink}</a></p>
-      <img src="${qrCodeUrl}" width="150">
-      <p style="color:gray; font-size:12px">Modifiez vos infos ici : <a href="${editLink}">${editLink}</a></p>
-    </div>`;
-  MailApp.sendEmail({to: email, subject: "Votre Carte Wemet", htmlBody: htmlBody});
-}
+        .profile-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: -60px;
+            z-index: 2;
+            padding: 0 20px;
+        }
+
+        .profile-img-container { position: relative; width: 120px; height: 120px; }
+        .profile-img {
+            width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
+            border: 4px solid white; box-shadow: 0 8px 16px rgba(0,0,0,0.1); background-color: #e5e7eb;
+        }
+        .lang-flag {
+            position: absolute; bottom: 5px; right: 5px; background: white;
+            border-radius: 50%; padding: 4px; font-size: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .user-info { text-align: center; margin-top: 15px; margin-bottom: 25px; }
+        .user-name { font-size: 1.5rem; font-weight: 700; margin: 0; color: var(--text-main); }
+        .user-title { font-size: 1rem; color: var(--text-sub); margin: 5px 0; font-weight: 400; }
+        .user-company { font-size: 0.95rem; color: var(--primary-color); font-weight: 600; }
+
+        .actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 20px; margin-bottom: 25px; }
+        .btn-action {
+            border: none; padding: 14px; border-radius: 12px; font-size: 0.95rem; font-weight: 600;
+            cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px;
+            text-decoration: none; text-align: center; transition: transform 0.2s;
+        }
+        .btn-action:active { transform: scale(0.96); }
+        .btn-primary { background-color: var(--primary-color); color: white; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
+        .btn-secondary { background-color: white; color: var(--text-main); border: 1px solid #e5e7eb; }
+
+        .widgets-list { padding: 0 20px 40px 20px; display: flex; flex-direction: column; gap: 15px; }
+        .widget-card {
+            background: white; border: 1px solid #f3f4f6; border-radius: 16px; padding: 16px;
+            display: flex; align-items: center; gap: 16px; text-decoration: none; color: inherit;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .widget-icon {
+            width: 40px; height: 40px; background-color: #eff6ff; color: var(--primary-color);
+            border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+        }
+        .widget-text { display: flex; flex-direction: column; flex: 1; }
+        .widget-label { font-size: 0.8rem; color: var(--text-sub); margin-bottom: 2px; text-transform: uppercase; font-weight: 600; }
+        .widget-value { font-size: 1rem; font-weight: 500; color: var(--text-main); word-break: break-word; }
+        
+        /* Loader */
+        .loader-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: white;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 999;
+            transition: opacity 0.5s;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3; border-top: 4px solid var(--primary-color); border-radius: 50%;
+            width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div id="loader" class="loader-overlay">
+        <div class="spinner"></div>
+        <div>Chargement du profil...</div>
+    </div>
+
+    <div class="app-container" id="app-content" style="opacity: 0; transition: opacity 0.5s;">
+        <div class="header"><div class="logo">WEMET</div></div>
+        <div class="profile-section">
+            <div class="profile-img-container">
+                <img id="p-photo" src="" class="profile-img">
+                <div class="lang-flag">🇫🇷</div>
+            </div>
+            <div class="user-info">
+                <h1 id="p-name" class="user-name"></h1>
+                <p id="p-title" class="user-title"></p>
+                <div id="p-company" class="user-company"></div>
+            </div>
+        </div>
+
+        <div class="actions-grid">
+            <a href="#" class="btn-action btn-primary" onclick="downloadVCard()">
+                <i class="fas fa-user-plus"></i><span>Sauvegarder</span>
+            </a>
+            <a href="#" class="btn-action btn-secondary" id="btn-share">
+                <i class="fas fa-share-alt"></i><span>Partager</span>
+            </a>
+        </div>
+
+        <div class="widgets-list">
+            <a href="#" id="link-phone" class="widget-card">
+                <div class="widget-icon"><i class="fas fa-phone-alt"></i></div>
+                <div class="widget-text"><span class="widget-label">Téléphone</span><span id="p-phone" class="widget-value"></span></div>
+                <i class="fas fa-chevron-right" style="color:#d1d5db; font-size: 0.8rem;"></i>
+            </a>
+
+            <a href="#" id="link-email" class="widget-card">
+                <div class="widget-icon"><i class="fas fa-envelope"></i></div>
+                <div class="widget-text"><span class="widget-label">Email</span><span id="p-email" class="widget-value"></span></div>
+                <i class="fas fa-chevron-right" style="color:#d1d5db; font-size: 0.8rem;"></i>
+            </a>
+
+            <a href="#" id="link-web" class="widget-card" target="_blank">
+                <div class="widget-icon"><i class="fas fa-globe"></i></div>
+                <div class="widget-text"><span class="widget-label">Site Web</span><span id="p-web" class="widget-value"></span></div>
+                <i class="fas fa-chevron-right" style="color:#d1d5db; font-size: 0.8rem;"></i>
+            </a>
+
+            <!-- LINKEDIN CORRIGÉ -->
+            <a href="#" id="link-linkedin" class="widget-card" target="_blank">
+                <div class="widget-icon"><i class="fab fa-linkedin-in"></i></div>
+                <div class="widget-text"><span class="widget-label">LinkedIn</span><span class="widget-value">Voir le profil</span></div>
+                <i class="fas fa-chevron-right" style="color:#d1d5db; font-size: 0.8rem;"></i>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // CONFIGURATION
+        const API_URL = 'https://solutionspelichet.github.io/weconnect'; 
+        let currentUser = {};
+
+        async function init() {
+            const userId = new URLSearchParams(window.location.search).get('id');
+            setTimeout(async () => {
+                if (API_URL && userId) {
+                    try {
+                        const response = await fetch(API_URL);
+                        const data = await response.json();
+                        const user = data.find(u => u.id == userId);
+                        if (user) renderProfile(user);
+                        else renderProfile({nom:"Utilisateur Introuvable", poste:"Vérifiez l'URL"});
+                    } catch (e) { renderProfile({nom:"Erreur", poste:"Connexion impossible"}); }
+                } else {
+                    renderProfile({nom:"Mode Démo", poste:"Ajoutez ?id=votre_id à l'URL"});
+                }
+            }, 500);
+        }
+
+        function renderProfile(data) {
+            currentUser = data;
+            // Gestion Prénom + Nom combinés
+            const fullName = (data.prenom ? data.prenom + ' ' : '') + (data.nom || '');
+            
+            setText('p-name', fullName || 'Sans Nom');
+            setText('p-title', data.poste);
+            setText('p-company', data.societe);
+            setText('p-phone', data.telephone);
+            setText('p-email', data.email);
+            setText('p-web', data.site_web);
+
+            setHref('link-phone', data.telephone ? `tel:${data.telephone}` : null);
+            setHref('link-email', data.email ? `mailto:${data.email}` : null);
+            setHref('link-web', formatUrl(data.site_web));
+            setHref('link-linkedin', formatUrl(data.linkedin));
+
+            const img = document.getElementById('p-photo');
+            img.src = data.photo_url || 'https://via.placeholder.com/150';
+            img.onerror = () => img.src = 'https://via.placeholder.com/150';
+
+            document.getElementById('loader').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('app-content').style.opacity = '1';
+            }, 500);
+        }
+
+        function setText(id, txt) { const el = document.getElementById(id); if(el) el.textContent = txt || ''; }
+        function setHref(id, url) { 
+            const el = document.getElementById(id); 
+            if(el) { 
+                if(url) { el.href = url; el.style.display = 'flex'; } 
+                else { el.style.display = 'none'; } 
+            } 
+        }
+        function formatUrl(url) {
+            if(!url) return null;
+            return url.startsWith('http') ? url : 'https://' + url;
+        }
+
+        function downloadVCard() {
+            if(!currentUser.nom) return;
+            const fullName = (currentUser.prenom ? currentUser.prenom + ' ' : '') + currentUser.nom;
+            const vcardBody = [
+                'BEGIN:VCARD', 'VERSION:3.0',
+                `FN:${fullName}`,
+                `N:${currentUser.nom};${currentUser.prenom || ''};;;`,
+                `TITLE:${currentUser.poste || ''}`,
+                `ORG:${currentUser.societe || ''}`,
+                `TEL;TYPE=CELL:${currentUser.telephone || ''}`,
+                `EMAIL:${currentUser.email || ''}`,
+                `URL:${currentUser.site_web || ''}`,
+                `URL;type=LINKEDIN:${currentUser.linkedin || ''}`,
+                'END:VCARD'
+            ].join('\n');
+
+            const blob = new Blob([vcardBody], { type: 'text/vcard;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `${(currentUser.nom || 'contact').replace(/\s+/g, '_')}.vcf`;
+            link.click();
+        }
+
+        document.getElementById('btn-share').addEventListener('click', async (e) => {
+            e.preventDefault();
+            if (navigator.share) {
+                try { await navigator.share({ title: 'Ma Carte', url: window.location.href }); } catch (err) {}
+            } else {
+                navigator.clipboard.writeText(window.location.href);
+                alert('Lien copié !');
+            }
+        });
+
+        window.onload = init;
+    </script>
+</body>
+</html>
