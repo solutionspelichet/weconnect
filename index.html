@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Ma Carte Digitale</title>
+    <!-- Icônes et Polices -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     
@@ -123,7 +124,7 @@
         <div class="header"><div class="logo">WEMET</div></div>
         <div class="profile-section">
             <div class="profile-img-container">
-                <img id="p-photo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2UzZTdlYiI+PHBhdGggZD0iTTEyIDEyYy0yLjIxIDAtNC0xLjc5LTQtNHMxLjc5LTQgNC00IDQgMS43OSA0IDQtMS43OSA0LTQgNHptMCAyYy0yLjY3IDAtOCAxLjM0LTggNHYyaDE2di0yYzAtMi42Ni01LjMzLTQtOC00eiIvPjwvc3ZnPg==" class="profile-img">
+                <img id="p-photo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2UzZTdlYiI+PHBhdGggZD0iTTEyIDEyYy0yLjIxIDAtNC0xLjc5LTQtNHMxLjc5LTQgNC00IDQgMS43OSA0IDQtMS43OSA0LTQgNHptMCAyYy0yLjY3IDAtOCAxLjM0LTggNHYyaDE2di0yYzAtMi42Ni01LjMzLTQtOC00eiIvPjwvc3ZnPg==" class="profile-img" alt="Profil">
                 <div class="lang-flag">🇫🇷</div>
             </div>
             <div class="user-info">
@@ -170,8 +171,10 @@
     </div>
 
     <script>
-        // CONFIGURATION API
+        // --- IMPORTANT : REMPLACEZ CECI PAR L'URL DE VOTRE GOOGLE APPS SCRIPT ---
         const API_URL = 'https://script.google.com/macros/s/AKfycbz12V16okyQngAw7QCUeRZNsbI4jy5aH4vfSk-kxL3jl1Dl3P-f0pAxlX0CKtQgZnGE8A/exec'; 
+        // ------------------------------------------------------------------------
+
         let currentUser = {};
 
         async function init() {
@@ -207,8 +210,21 @@
             setHref('link-web', formatUrl(data.site_web));
             setHref('link-linkedin', formatUrl(data.linkedin));
 
+            // --- CORRECTION AFFICHAGE PHOTO GOOGLE DRIVE ---
             const img = document.getElementById('p-photo');
-            if(data.photo_url) img.src = data.photo_url;
+            let photoLink = data.photo_url;
+
+            if (photoLink) {
+                // Si c'est un lien Google Drive standard, on le transforme en lien direct "lh3"
+                if (photoLink.includes('drive.google.com') && photoLink.includes('id=')) {
+                    const match = photoLink.match(/id=([a-zA-Z0-9_-]+)/);
+                    if (match && match[1]) {
+                        // Ce format est beaucoup plus rapide et stable pour l'affichage direct
+                        photoLink = "https://lh3.googleusercontent.com/d/" + match[1];
+                    }
+                }
+                img.src = photoLink;
+            }
 
             document.getElementById('loader').style.opacity = '0';
             setTimeout(() => {
