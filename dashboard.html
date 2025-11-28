@@ -614,16 +614,15 @@
                     formData.photo_data = window.uploadQueue['photo_url'].data;
                     formData.photo_mime = window.uploadQueue['photo_url'].mime;
                 }
-                // Pour Logo (On triche un peu en réutilisant les champs photo_data du script, 
-                // mais pour supporter PLUSIEURS images, il faudrait adapter le script Google.
-                // ICI: On va envoyer une seule image à la fois ou adapter le script plus tard.
-                // Pour l'instant, le script actuel ne gère qu'une "photo_data".
-                // SOLUTION TEMPORAIRE: On ne sauvegarde que la Photo Principale via le script actuel.
-                // Si vous voulez tout sauvegarder, il faut mettre à jour le script Google Apps.)
+                // Pour Logo
+                if(window.uploadQueue['logo_url']) {
+                    formData.logo_data = window.uploadQueue['logo_url'].data;
+                }
+                // Pour Bannière
+                if(window.uploadQueue['banner_url']) {
+                    formData.banner_data = window.uploadQueue['banner_url'].data;
+                }
             }
-            
-            // NOTE IMPORTANTE : Pour l'instant, le script Google ne sauve que la photo de profil.
-            // Si vous voulez logo et bannière, il faudra modifier le script Backend.
             
             fetch(API_URL, {
                 method: 'POST',
