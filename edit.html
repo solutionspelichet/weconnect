@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Éditeur - Weconnect</title>
+    <title>Éditeur - Wemet Clone</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background-color: #f0f4ff; font-family: sans-serif; }
-        /* Accordéon simple : par défaut caché, si classe 'show' ajoutée, on affiche */
         .accordion-body {
             display: none;
             padding: 1rem;
@@ -38,14 +37,14 @@
 
         <h1 class="text-2xl font-bold text-gray-900 px-6 mb-2">Ma carte</h1>
         
-        <!-- Identifiant (ID) - Création de compte -->
+        <!-- Identifiant (ID) -->
         <div class="px-6 mb-6">
             <label class="text-xs text-gray-500 uppercase font-bold ml-1">Identifiant Unique (ID)</label>
             <div class="bg-white p-2 rounded-xl border border-blue-200 flex items-center shadow-sm">
                 <span class="text-gray-400 pl-2 text-sm">id:</span>
                 <input type="text" id="field-id" class="w-full p-2 outline-none font-bold text-gray-700" placeholder="ex: jean.dupont">
             </div>
-            <p class="text-xs text-gray-400 mt-1 ml-1"><i class="fas fa-info-circle"></i> Changez ceci pour créer un nouvel utilisateur.</p>
+            <p class="text-xs text-gray-400 mt-1 ml-1"><i class="fas fa-info-circle"></i> Changez l'ID pour créer un nouvel utilisateur.</p>
         </div>
 
         <form id="profileForm" class="px-4 flex flex-col gap-3">
@@ -56,16 +55,15 @@
                     <span><i class="fas fa-camera mr-2"></i> Apparence & Photo</span>
                     <i class="fas fa-chevron-down"></i>
                 </button>
-                <div id="acc-apparence" class="accordion-body show"> <!-- 'show' par défaut pour qu'on le voie -->
+                <div id="acc-apparence" class="accordion-body show">
                     
-                    <!-- Upload Photo -->
                     <div class="flex flex-col items-center gap-4 mb-4">
-                        <img id="preview-photo" src="https://via.placeholder.com/100" class="w-24 h-24 rounded-full border-4 border-blue-100 object-cover shadow-md">
+                        <!-- Image par défaut robuste (base64) pour éviter l'erreur 404 -->
+                        <img id="preview-photo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2UzZTdlYiI+PHBhdGggZD0iTTEyIDEyYy0yLjIxIDAtNC0xLjc5LTQtNHMxLjc5LTQgNC00IDQgMS43OSA0IDQtMS43OSA0LTQgNHptMCAyYy0yLjY3IDAtOCAxLjM0LTggNHYyaDE2di0yYzAtMi42Ni01LjMzLTQtOC00eiIvPjwvc3ZnPg==" class="w-24 h-24 rounded-full border-4 border-blue-100 object-cover shadow-md bg-white">
                         <label class="bg-blue-100 text-blue-600 px-4 py-2 rounded-full cursor-pointer font-bold text-sm hover:bg-blue-200 transition">
                             <i class="fas fa-upload mr-1"></i> Choisir une photo
                             <input type="file" id="photo-upload" class="hidden" accept="image/*" onchange="previewImage(event)">
                         </label>
-                        <!-- Champ caché pour stocker l'URL existante -->
                         <input type="hidden" id="field-photo_url"> 
                     </div>
 
@@ -118,17 +116,14 @@
                     <i class="fas fa-chevron-down"></i>
                 </button>
                 <div id="acc-widgets" class="accordion-body">
-                    
                     <div class="input-group">
                         <label class="input-label"><i class="fab fa-linkedin text-blue-700"></i> LinkedIn</label>
                         <input type="text" id="field-linkedin" class="input-field" placeholder="Lien profil LinkedIn">
                     </div>
-                    
                     <div class="input-group">
                         <label class="input-label"><i class="fas fa-globe text-gray-600"></i> Site Web</label>
                         <input type="text" id="field-site_web" class="input-field" placeholder="www.monsite.com">
                     </div>
-
                 </div>
             </div>
 
@@ -143,17 +138,14 @@
 
     </div>
 
-    <!-- Script de logique -->
     <script>
-        // CONFIGURATION
-        const API_URL = 'https://script.google.com/macros/s/AKfycbz12V16okyQngAw7QCUeRZNsbI4jy5aH4vfSk-kxL3jl1Dl3P-f0pAxlX0CKtQgZnGE8A/exec'; // <-- COLLEZ L'URL ICI
+        // CONFIGURATION API
+        const API_URL = 'https://script.google.com/macros/s/AKfycbz12V16okyQngAw7QCUeRZNsbI4jy5aH4vfSk-kxL3jl1Dl3P-f0pAxlX0CKtQgZnGE8A/exec'; 
 
-        // Gestion Accordéons
         function toggleAcc(id) {
             document.getElementById(id).classList.toggle('show');
         }
 
-        // Prévisualisation image
         function previewImage(event) {
             const reader = new FileReader();
             reader.onload = function(){
@@ -162,52 +154,44 @@
             if(event.target.files[0]) reader.readAsDataURL(event.target.files[0]);
         }
 
-        // Chargement Données
         window.onload = async function() {
             const urlParams = new URLSearchParams(window.location.search);
             const userId = urlParams.get('id');
 
             if(userId) {
                 document.getElementById('field-id').value = userId;
-                if(API_URL) {
-                    try {
-                        // Petit effet visuel chargement
-                        document.getElementById('field-nom').placeholder = "Chargement...";
-                        
-                        const response = await fetch(API_URL);
-                        const data = await response.json();
-                        const user = data.find(u => u.id == userId);
-                        
-                        if(user) {
-                            // Remplissage des champs
-                            const fields = ['prenom', 'nom', 'societe', 'poste', 'telephone', 'email', 'site_web', 'linkedin', 'photo_url'];
-                            fields.forEach(f => {
-                                if(document.getElementById('field-'+f)) {
-                                    document.getElementById('field-'+f).value = user[f] || '';
-                                }
-                            });
-                            // Aperçu photo
-                            if(user.photo_url) document.getElementById('preview-photo').src = user.photo_url;
-                        }
-                    } catch(e) { console.error(e); }
-                }
+                try {
+                    document.getElementById('field-nom').placeholder = "Chargement...";
+                    const response = await fetch(API_URL);
+                    const data = await response.json();
+                    const user = data.find(u => u.id == userId);
+                    
+                    if(user) {
+                        const fields = ['prenom', 'nom', 'societe', 'poste', 'telephone', 'email', 'site_web', 'linkedin', 'photo_url'];
+                        fields.forEach(f => {
+                            if(document.getElementById('field-'+f)) {
+                                document.getElementById('field-'+f).value = user[f] || '';
+                            }
+                        });
+                        if(user.photo_url) document.getElementById('preview-photo').src = user.photo_url;
+                    }
+                } catch(e) { console.error(e); }
             } else {
-                // Générer un ID aléatoire si vide
+                // Générer un ID aléatoire si on arrive sans ID
                 document.getElementById('field-id').value = "user_" + Math.floor(Math.random() * 10000);
             }
         };
 
-        // Sauvegarde avec Gestion de Fichier
         function saveData() {
             const btn = document.getElementById('btn-save');
             const originalText = btn.innerHTML;
+            
             btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Envoi...';
             btn.disabled = true;
 
             const id = document.getElementById('field-id').value;
-            if(!id) { alert("L'identifiant est obligatoire"); btn.disabled=false; btn.innerHTML=originalText; return; }
+            if(!id) { alert("L'identifiant (ID) est obligatoire"); btn.disabled=false; btn.innerHTML=originalText; return; }
 
-            // 1. Préparer l'objet JSON
             let formData = {
                 id: id,
                 prenom: document.getElementById('field-prenom').value,
@@ -218,28 +202,31 @@
                 email: document.getElementById('field-email').value,
                 site_web: document.getElementById('field-site_web').value,
                 linkedin: document.getElementById('field-linkedin').value,
-                photo_url: document.getElementById('field-photo_url').value // Garde l'ancienne URL si pas de nouvelle
+                photo_url: document.getElementById('field-photo_url').value
             };
 
-            // 2. Vérifier si une nouvelle photo est sélectionnée
             const fileInput = document.getElementById('photo-upload');
             if (fileInput.files.length > 0) {
+                // Limite de taille 4MB pour éviter les erreurs de transfert
+                if(fileInput.files[0].size > 4 * 1024 * 1024) {
+                    alert("La photo est trop lourde (max 4Mo).");
+                    btn.disabled = false; btn.innerHTML = originalText;
+                    return;
+                }
+
                 const reader = new FileReader();
                 reader.readAsDataURL(fileInput.files[0]);
                 reader.onload = function () {
-                    // On ajoute les données de la photo au JSON
-                    formData.photo_data = reader.result; // Base64 complet
+                    formData.photo_data = reader.result;
                     formData.photo_name = fileInput.files[0].name;
                     formData.photo_mime = fileInput.files[0].type;
                     sendDataToScript(formData, btn, originalText);
                 };
                 reader.onerror = function (error) {
-                    console.log('Error: ', error);
                     alert("Erreur lecture image");
-                    btn.disabled = false;
+                    btn.disabled = false; btn.innerHTML = originalText;
                 };
             } else {
-                // Pas de photo, on envoie direct
                 sendDataToScript(formData, btn, originalText);
             }
         }
@@ -247,20 +234,20 @@
         function sendDataToScript(data, btn, originalText) {
             fetch(API_URL, {
                 method: 'POST',
-                mode: 'no-cors', // Important pour Google Apps Script
+                mode: 'no-cors', // Mode obligatoire pour Google Apps Script
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             })
             .then(() => {
-                alert("Sauvegardé avec succès ! Vérifiez vos emails.");
+                // Avec no-cors, on ne reçoit pas de réponse JSON lisible, mais le succès de la promesse indique que l'envoi a fonctionné.
+                alert("Sauvegarde réussie ! Vous allez recevoir un email de confirmation.");
                 btn.innerHTML = originalText;
                 btn.disabled = false;
-                // Optionnel : recharger la page avec le bon ID si on vient de le changer
-                // window.location.search = "?id=" + data.id;
             })
             .catch(err => {
                 console.error(err);
-                alert("Erreur réseau");
+                alert("Erreur lors de l'envoi. Vérifiez votre connexion.");
+                btn.innerHTML = originalText;
                 btn.disabled = false;
             });
         }
