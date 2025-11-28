@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Ma Carte Digitale</title>
-    <!-- Icônes -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Police Google Fonts (Inter pour un look moderne comme WeMet) -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     
     <style>
@@ -103,7 +101,6 @@
         .widget-label { font-size: 0.8rem; color: var(--text-sub); margin-bottom: 2px; text-transform: uppercase; font-weight: 600; }
         .widget-value { font-size: 1rem; font-weight: 500; color: var(--text-main); word-break: break-word; }
         
-        /* Loader */
         .loader-overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: white;
             display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 999;
@@ -126,7 +123,7 @@
         <div class="header"><div class="logo">WEMET</div></div>
         <div class="profile-section">
             <div class="profile-img-container">
-                <img id="p-photo" src="" class="profile-img">
+                <img id="p-photo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2UzZTdlYiI+PHBhdGggZD0iTTEyIDEyYy0yLjIxIDAtNC0xLjc5LTQtNHMxLjc5LTQgNC00IDQgMS43OSA0IDQtMS43OSA0LTQgNHptMCAyYy0yLjY3IDAtOCAxLjM0LTggNHYyaDE2di0yYzAtMi42Ni01LjMzLTQtOC00eiIvPjwvc3ZnPg==" class="profile-img">
                 <div class="lang-flag">🇫🇷</div>
             </div>
             <div class="user-info">
@@ -164,7 +161,6 @@
                 <i class="fas fa-chevron-right" style="color:#d1d5db; font-size: 0.8rem;"></i>
             </a>
 
-            <!-- LINKEDIN CORRIGÉ -->
             <a href="#" id="link-linkedin" class="widget-card" target="_blank">
                 <div class="widget-icon"><i class="fab fa-linkedin-in"></i></div>
                 <div class="widget-text"><span class="widget-label">LinkedIn</span><span class="widget-value">Voir le profil</span></div>
@@ -174,8 +170,8 @@
     </div>
 
     <script>
-        // CONFIGURATION
-        const API_URL = 'https://solutionspelichet.github.io/weconnect'; 
+        // CONFIGURATION API
+        const API_URL = 'https://script.google.com/macros/s/AKfycbz12V16okyQngAw7QCUeRZNsbI4jy5aH4vfSk-kxL3jl1Dl3P-f0pAxlX0CKtQgZnGE8A/exec'; 
         let currentUser = {};
 
         async function init() {
@@ -197,7 +193,6 @@
 
         function renderProfile(data) {
             currentUser = data;
-            // Gestion Prénom + Nom combinés
             const fullName = (data.prenom ? data.prenom + ' ' : '') + (data.nom || '');
             
             setText('p-name', fullName || 'Sans Nom');
@@ -213,8 +208,7 @@
             setHref('link-linkedin', formatUrl(data.linkedin));
 
             const img = document.getElementById('p-photo');
-            img.src = data.photo_url || 'https://via.placeholder.com/150';
-            img.onerror = () => img.src = 'https://via.placeholder.com/150';
+            if(data.photo_url) img.src = data.photo_url;
 
             document.getElementById('loader').style.opacity = '0';
             setTimeout(() => {
