@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ma Carte Digitale</title>
+    <!-- Icônes et Polices -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-main: #111827;
+            --text-sub: #6b7280;
+            --header-bg: #000000;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            color: var(--text-main);
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            background-color: var(--card-bg);
+            min-height: 100vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+        }
+
+        .header {
+            background-color: var(--header-bg);
+            height: 140px;
+            width: 100%;
+            border-bottom-left-radius: 30px;
+            border-bottom-right-radius: 30px;
+            display: flex;
+            justify-content: center;
+            padding-top: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo { color: white; font-weight: 700; font-size: 1.2rem; letter-spacing: 1px; text-transform: uppercase; }
+
+        .profile-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: -60px;
+            z-index: 2;
+            padding: 0 20px;
+        }
+
+        .profile-img-container { position: relative; width: 120px; height: 120px; }
+        .profile-img {
+            width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
+            border: 4px solid white; box-shadow: 0 8px 16px rgba(0,0,0,0.1); background-color: #e5e7eb;
+        }
+        .lang-flag {
+            position: absolute; bottom: 5px; right: 5px; background: white;
+            border-radius: 50%; padding: 4px; font-size: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .user-info { text-align: center; margin-top: 15px; margin-bottom: 25px; }
+        .user-name { font-size: 1.5rem; font-weight: 700; margin: 0; color: var(--text-main); }
+        .user-title { font-size: 1rem; color: var(--text-sub); margin: 5px 0; font-weight: 400; }
+        .user-company { font-size: 0.95rem; color: var(--primary-color); font-weight: 600; }
+
+        .actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 20px; margin-bottom: 25px; }
+        .btn-action {
+            border: none; padding: 14px; border-radius: 12px; font-size: 0.95rem; font-weight: 600;
+            cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px;
+            text-decoration: none; text-align: center; transition: transform 0.2s;
+        }
+        .btn-action:active { transform: scale(0.96); }
+        .btn-primary { background-color: var(--primary-color); color: white; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
+        .btn-secondary { background-color: white; color: var(--text-main); border: 1px solid #e5e7eb; }
+
+        .widgets-list { padding: 0 20px 40px 20px; display: flex; flex-direction: column; gap: 15px; }
+        .widget-card {
+            background: white; border: 1px solid #f3f4f6; border-radius: 16px; padding: 16px;
+            display: flex; align-items: center; gap: 16px; text-decoration: none; color: inherit;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .widget-icon {
+            width: 40px; height: 40px; background-color: #eff6ff; color: var(--primary-color);
+            border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+        }
+        .widget-text { display: flex; flex-direction: column; flex: 1; }
+        .widget-label { font-size: 0.8rem; color: var(--text-sub); margin-bottom: 2px; text-transform: uppercase; font-weight: 600; }
+        .widget-value { font-size: 1rem; font-weight: 500; color: var(--text-main); word-break: break-word; }
+        
+        .loader-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: white;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 999;
+            transition: opacity 0.5s;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3; border-top: 4px solid var(--primary-color); border-radius: 50%;
+            width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div id="loader" class="loader-overlay">
+        <div class="spinner"></div>
+        <div>Chargement du profil...</div>
+    </div>
+
+    <div class="app-container" id="app-content" style="opacity: 0; transition: opacity 0.5s;">
+        <div class="header"><div class="logo">WECONNECT</div></div>
+        <div class="profile-section">
+            <div class="profile-img-container">
+                <img id="p-photo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2UzZTdlYiI+PHBhdGggZD0iTTEyIDEyYy0yLjIxIDAtNC0xLjc5LTQtNHMxLjc5LTQgNC00IDQgMS43OSA0IDQtMS43OSA0LTQgNHptMCAyYy0yLjY3IDAtOCAxLjM0LTggNHYyaDE2di0yYzAtMi42Ni01LjMzLTQtOC00eiIvPjwvc3ZnPg==" class="profile-img" alt="Profil">
+                <div class="lang-flag">🇫🇷</div>
+            </div>
+            <div class="user-info">
+                <h1 id="p-name" class="user-name"></h1>
+                <p id="p-title" class="user-title"></p>
+                <div id="p-company" class="user-company"></div>
+            </div>
+        </div>
+
+        <div class="actions-grid">
+            <a href="#" class="btn-action btn-primary" onclick="downloadVCard()">
+                <i class="fas fa-user-plus"></i><span>Sauvegarder</span>
+            </a>
+            <a href="#" class="btn-action btn-secondary" id="btn-share">
+                <i class="fas fa-share-alt"></i><span>Partager</span>
+            </a>
+        </div>
+
+        <div class="widgets-list">
+            <a href="#" id="link-phone" class="widget-card">
+                <div class="widget-icon"><i class="fas fa-phone-alt"></i></div>
+                <div class="widget-text"><span class="widget-label">Téléphone</span><span id="p-phone" class="widget-value"></span></div>
+                <i class="fas fa-chevron-right" style="color:#d1d5db; font-size: 0.8rem;"></i>
+            </a>
+
+            <a href="#" id="link-email" class="widget-card">
+                <div class="widget-icon"><i class="fas fa-envelope"></i></div>
+                <div class="widget-text"><span class="widget-label">Email</span><span id="p-email" class="widget-value"></span></div>
+                <i class="fas fa-chevron-right" style="color:#d1d5db; font-size: 0.8rem;"></i>
+            </a>
+
+            <a href="#" id="link-web" class="widget-card" target="_blank">
+                <div class="widget-icon"><i class="fas fa-globe"></i></div>
+                <div class="widget-text"><span class="widget-label">Site Web</span><span id="p-web" class="widget-value"></span></div>
+                <i class="fas fa-chevron-right" style="color:#d1d5db; font-size: 0.8rem;"></i>
+            </a>
+
+            <a href="#" id="link-linkedin" class="widget-card" target="_blank">
+                <div class="widget-icon"><i class="fab fa-linkedin-in"></i></div>
+                <div class="widget-text"><span class="widget-label">LinkedIn</span><span class="widget-value">Voir le profil</span></div>
+                <i class="fas fa-chevron-right" style="color:#d1d5db; font-size: 0.8rem;"></i>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // --- IMPORTANT : REMPLACEZ CECI PAR L'URL DE VOTRE GOOGLE APPS SCRIPT ---
+        const API_URL = 'https://script.google.com/macros/s/AKfycbz12V16okyQngAw7QCUeRZNsbI4jy5aH4vfSk-kxL3jl1Dl3P-f0pAxlX0CKtQgZnGE8A/exec'; 
+        // ------------------------------------------------------------------------
+
+        let currentUser = {};
+
+        async function init() {
+            const userId = new URLSearchParams(window.location.search).get('id');
+            setTimeout(async () => {
+                if (API_URL && userId) {
+                    try {
+                        const response = await fetch(API_URL);
+                        const data = await response.json();
+                        const user = data.find(u => u.id == userId);
+                        if (user) renderProfile(user);
+                        else renderProfile({nom:"Utilisateur Introuvable", poste:"Vérifiez l'URL"});
+                    } catch (e) { renderProfile({nom:"Erreur", poste:"Connexion impossible"}); }
+                } else {
+                    renderProfile({nom:"Mode Démo", poste:"Ajoutez ?id=votre_id à l'URL"});
+                }
+            }, 500);
+        }
+
+        function renderProfile(data) {
+            currentUser = data;
+            const fullName = (data.prenom ? data.prenom + ' ' : '') + (data.nom || '');
+            
+            setText('p-name', fullName || 'Sans Nom');
+            setText('p-title', data.poste);
+            setText('p-company', data.societe);
+            setText('p-phone', data.telephone);
+            setText('p-email', data.email);
+            setText('p-web', data.site_web);
+
+            setHref('link-phone', data.telephone ? `tel:${data.telephone}` : null);
+            setHref('link-email', data.email ? `mailto:${data.email}` : null);
+            setHref('link-web', formatUrl(data.site_web));
+            setHref('link-linkedin', formatUrl(data.linkedin));
+
+            // --- CORRECTION AFFICHAGE PHOTO GOOGLE DRIVE ---
+            const img = document.getElementById('p-photo');
+            let photoLink = data.photo_url;
+
+            if (photoLink) {
+                // Si c'est un lien Google Drive standard, on le transforme en lien direct "lh3"
+                if (photoLink.includes('drive.google.com') && photoLink.includes('id=')) {
+                    const match = photoLink.match(/id=([a-zA-Z0-9_-]+)/);
+                    if (match && match[1]) {
+                        // Ce format est beaucoup plus rapide et stable pour l'affichage direct
+                        photoLink = "https://lh3.googleusercontent.com/d/" + match[1];
+                    }
+                }
+                img.src = photoLink;
+            }
+
+            document.getElementById('loader').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('app-content').style.opacity = '1';
+            }, 500);
+        }
+
+        function setText(id, txt) { const el = document.getElementById(id); if(el) el.textContent = txt || ''; }
+        function setHref(id, url) { 
+            const el = document.getElementById(id); 
+            if(el) { 
+                if(url) { el.href = url; el.style.display = 'flex'; } 
+                else { el.style.display = 'none'; } 
+            } 
+        }
+        function formatUrl(url) {
+            if(!url) return null;
+            return url.startsWith('http') ? url : 'https://' + url;
+        }
+
+        function downloadVCard() {
+            if(!currentUser.nom) return;
+            const fullName = (currentUser.prenom ? currentUser.prenom + ' ' : '') + currentUser.nom;
+            const vcardBody = [
+                'BEGIN:VCARD', 'VERSION:3.0',
+                `FN:${fullName}`,
+                `N:${currentUser.nom};${currentUser.prenom || ''};;;`,
+                `TITLE:${currentUser.poste || ''}`,
+                `ORG:${currentUser.societe || ''}`,
+                `TEL;TYPE=CELL:${currentUser.telephone || ''}`,
+                `EMAIL:${currentUser.email || ''}`,
+                `URL:${currentUser.site_web || ''}`,
+                `URL;type=LINKEDIN:${currentUser.linkedin || ''}`,
+                'END:VCARD'
+            ].join('\n');
+
+            const blob = new Blob([vcardBody], { type: 'text/vcard;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `${(currentUser.nom || 'contact').replace(/\s+/g, '_')}.vcf`;
+            link.click();
+        }
+
+        document.getElementById('btn-share').addEventListener('click', async (e) => {
+            e.preventDefault();
+            if (navigator.share) {
+                try { await navigator.share({ title: 'Ma Carte', url: window.location.href }); } catch (err) {}
+            } else {
+                navigator.clipboard.writeText(window.location.href);
+                alert('Lien copié !');
+            }
+        });
+
+        window.onload = init;
+    </script>
+</body>
+</html>
