@@ -3,86 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ma Carte Digitale</title>
+    <title>WeLink - Ma Carte Digitale</title>
     <!-- Icônes et Polices -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Cropper.js (Pour le recadrage) -->
+    <!-- Cropper.js -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <style>
-        :root {
-            --primary-color: #3b82f6;
-            --bg-color: #f0f2f5;
-            --card-bg: #ffffff;
-            --text-main: #111827;
-            --text-sub: #6b7280;
-            --header-bg: #000000;
-        }
-
+        :root { --primary-color: #3b82f6; --bg-color: #f0f2f5; --card-bg: #ffffff; --header-bg: #000000; }
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); }
 
-        /* --- MODE VUE (CARTE MOBILE) --- */
-        #view-mode {
-            max-width: 480px; margin: 0 auto; min-height: 100vh;
-            background: white; box-shadow: 0 0 20px rgba(0,0,0,0.05);
-            display: flex; flex-direction: column; position: relative;
-        }
-        .header-bg {
-            height: 140px; background-color: black; border-radius: 0 0 30px 30px;
-            display: flex; align-items: flex-start; padding: 20px;
-            background-size: cover; background-position: center;
-        }
-        .profile-img {
-            width: 120px; height: 120px; border-radius: 50%; object-fit: cover;
-            border: 4px solid white; box-shadow: 0 8px 16px rgba(0,0,0,0.1); background-color: #e5e7eb;
-            margin-top: -60px;
-        }
-        .widget-card {
-            background: white; border: 1px solid #f3f4f6; border-radius: 16px; padding: 16px;
-            display: flex; align-items: center; gap: 16px; margin-bottom: 15px; cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: transform 0.1s; text-decoration: none; color: inherit;
-        }
+        /* VUE MOBILE */
+        #view-mode { max-width: 480px; margin: 0 auto; min-height: 100vh; background: white; box-shadow: 0 0 20px rgba(0,0,0,0.05); display: flex; flex-direction: column; position: relative; }
+        .header-bg { height: 140px; background-color: black; border-radius: 0 0 30px 30px; display: flex; align-items: flex-start; padding: 20px; background-size: cover; background-position: center; }
+        .profile-img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid white; box-shadow: 0 8px 16px rgba(0,0,0,0.1); background-color: #e5e7eb; margin-top: -60px; }
+        .widget-card { background: white; border: 1px solid #f3f4f6; border-radius: 16px; padding: 16px; display: flex; align-items: center; gap: 16px; margin-bottom: 15px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: transform 0.1s; text-decoration: none; color: inherit; }
         .widget-card:active { transform: scale(0.98); }
         
-        /* --- MODE ÉDITEUR --- */
-        #edit-mode {
-            display: none; background-color: #f8f9fa; min-height: 100vh; padding-bottom: 50px;
-        }
+        /* EDITEUR */
+        #edit-mode { display: none; background-color: #f8f9fa; min-height: 100vh; padding-bottom: 50px; }
         .tab-btn { border-bottom: 2px solid transparent; transition: all 0.2s; }
         .tab-btn.active { border-bottom-color: #2563eb; color: #2563eb; }
         .input-file-wrapper { display: flex; align-items: center; gap: 10px; }
-        .fake-file-input {
-            flex: 1; border: 1px solid #d1d5db; border-radius: 6px; padding: 10px;
-            background: white; color: #4b5563; font-size: 0.9rem;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .btn-add {
-            background: #e5e7eb; color: #374151; font-weight: 600; padding: 10px 20px;
-            border-radius: 6px; font-size: 0.9rem; transition: background 0.2s;
-        }
-        .loader {
-            position: fixed; inset: 0; background: white; z-index: 50;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-        }
+        .fake-file-input { flex: 1; border: 1px solid #d1d5db; border-radius: 6px; padding: 10px; background: white; color: #4b5563; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; }
+        .btn-add { background: #e5e7eb; color: #374151; font-weight: 600; padding: 10px 20px; border-radius: 6px; font-size: 0.9rem; transition: background 0.2s; }
+        
+        /* Loader & Modals */
+        .loader { position: fixed; inset: 0; background: white; z-index: 50; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .modal-overlay { display: none; position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: white; width: 100%; max-width: 400px; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: fadeIn 0.2s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        
+        .crop-area { height: 350px; background: #333; position: relative; }
+        .cropper-view-box, .cropper-face { border-radius: 0; }
 
-        /* --- MODALE DE RECADRAGE --- */
-        #crop-modal {
-            display: none; position: fixed; inset: 0; z-index: 100;
-            background: rgba(0,0,0,0.8); align-items: center; justify-content: center;
+        /* Floating Edit Button Enhanced */
+        .edit-trigger {
+            position: fixed; bottom: 30px; right: 20px;
+            background: white; border-radius: 50px; /* Pill shape */
+            padding: 12px 24px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            display: flex; align-items: center; gap: 10px;
+            cursor: pointer; z-index: 40; color: #374151;
+            font-weight: 700; font-size: 0.95rem;
+            border: 1px solid #f3f4f6;
+            transition: all 0.2s;
         }
-        .crop-container {
-            background: white; width: 90%; max-width: 500px; border-radius: 12px; overflow: hidden;
-            display: flex; flex-direction: column; max-height: 90vh;
-        }
-        .crop-area {
-            height: 400px; background: #333; position: relative;
-        }
-        /* Override CropperJS styles for clean look */
-        .cropper-view-box, .cropper-face { border-radius: 0; } /* Par défaut carré, rond simulé en JS si besoin */
+        .edit-trigger:hover { transform: translateY(-2px); color: var(--primary-color); box-shadow: 0 6px 20px rgba(59,130,246,0.2); }
     </style>
 </head>
 <body>
@@ -93,9 +64,60 @@
         <div class="text-gray-500 font-medium">Chargement...</div>
     </div>
 
+    <!-- MODALE AUTHENTIFICATION (CODE SECRET) -->
+    <div id="auth-modal" class="modal-overlay">
+        <div class="modal-content p-6 text-center">
+            <i class="fas fa-lock text-3xl text-blue-600 mb-4"></i>
+            <h3 class="text-xl font-bold text-gray-800 mb-2">Modification protégée</h3>
+            <p class="text-gray-500 text-sm mb-6">Veuillez entrer votre code secret pour modifier cette carte.</p>
+            
+            <input type="password" id="auth-code-input" class="w-full border border-gray-300 rounded-lg p-3 mb-4 text-center text-lg tracking-widest outline-none focus:border-blue-500" placeholder="Code Secret">
+            
+            <div class="flex gap-3">
+                <button onclick="closeAuthModal()" class="flex-1 py-3 text-gray-600 font-bold bg-gray-100 rounded-lg">Annuler</button>
+                <button onclick="submitAuthCode()" class="flex-1 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700">Valider</button>
+            </div>
+            <p id="auth-error" class="text-red-500 text-xs mt-3 hidden">Code incorrect</p>
+        </div>
+    </div>
+
+    <!-- MODALE PARTAGE (FALLBACK) -->
+    <div id="share-modal" class="modal-overlay">
+        <div class="modal-content p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-lg">Partager la carte</h3>
+                <button onclick="document.getElementById('share-modal').style.display='none'" class="text-gray-400 hover:text-black"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div class="bg-gray-100 p-3 rounded-lg flex items-center justify-between mb-4">
+                <span id="share-link-text" class="text-sm text-gray-600 truncate mr-2">...</span>
+                <button onclick="copyLink()" class="text-blue-600 font-bold text-sm">COPIER</button>
+            </div>
+            
+            <div class="grid grid-cols-4 gap-4 text-center">
+                <a id="share-wa" href="#" target="_blank" class="flex flex-col items-center gap-1 text-gray-600 hover:text-green-500">
+                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-xl"><i class="fab fa-whatsapp"></i></div>
+                    <span class="text-xs">WhatsApp</span>
+                </a>
+                <a id="share-mail" href="#" class="flex flex-col items-center gap-1 text-gray-600 hover:text-blue-500">
+                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-xl"><i class="fas fa-envelope"></i></div>
+                    <span class="text-xs">Email</span>
+                </a>
+                <a id="share-li" href="#" target="_blank" class="flex flex-col items-center gap-1 text-gray-600 hover:text-blue-700">
+                    <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-xl"><i class="fab fa-linkedin-in"></i></div>
+                    <span class="text-xs">LinkedIn</span>
+                </a>
+                <a href="#" onclick="downloadQr()" class="flex flex-col items-center gap-1 text-gray-600 hover:text-purple-600">
+                    <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center text-xl"><i class="fas fa-qrcode"></i></div>
+                    <span class="text-xs">QR Code</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
     <!-- MODALE CROPPER -->
-    <div id="crop-modal">
-        <div class="crop-container">
+    <div id="crop-modal" class="modal-overlay">
+        <div class="modal-content !max-w-lg"> <!-- Slightly wider -->
             <div class="p-4 border-b flex justify-between items-center bg-gray-50">
                 <h3 class="font-bold text-gray-800">Recadrer l'image</h3>
                 <button onclick="closeCropper()" class="text-gray-500 hover:text-black"><i class="fas fa-times"></i></button>
@@ -110,11 +132,12 @@
         </div>
     </div>
 
-    <!-- ================= VUE CARTE (MOBILE) ================= -->
+    <!-- ================= VUE CARTE ================= -->
     <div id="view-mode">
         <div class="header-bg" id="v-header-bg">
             <img id="v-logo-img" src="" style="display:none; height: 40px; object-fit: contain;">
-            <div id="v-logo-text" class="text-white font-bold text-xl tracking-wider uppercase">WEKONECT</div>
+            <!-- NOM APPLICATION : WeLink -->
+            <div id="v-logo-text" class="text-white font-bold text-xl tracking-wider uppercase">WeLink</div>
         </div>
 
         <div class="flex flex-col items-center px-5 relative z-10 flex-1">
@@ -127,64 +150,50 @@
                 <p id="v-desc" class="text-sm text-gray-500 mt-2 italic max-w-xs mx-auto"></p>
             </div>
 
-            <!-- Boutons Actions -->
             <div class="grid grid-cols-2 gap-4 w-full mb-6">
                 <button onclick="downloadVCard()" class="bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg flex flex-col items-center justify-center gap-1 active:scale-95 transition">
                     <i class="fas fa-address-card text-xl"></i>
                     <span>Sauvegarder</span>
                 </button>
-                <button id="btn-share" class="bg-white text-gray-800 border border-gray-200 font-bold py-3 rounded-xl shadow-sm flex flex-col items-center justify-center gap-1 active:scale-95 transition">
+                <button onclick="openShareModal()" class="bg-white text-gray-800 border border-gray-200 font-bold py-3 rounded-xl shadow-sm flex flex-col items-center justify-center gap-1 active:scale-95 transition">
                     <i class="fas fa-share-alt text-xl"></i>
                     <span>Partager</span>
                 </button>
             </div>
 
-            <!-- Widgets -->
             <div class="w-full mb-8 pb-20">
                 <a href="#" id="link-phone" class="widget-card">
                     <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xl"><i class="fas fa-phone"></i></div>
-                    <div class="flex-1">
-                        <div class="text-xs text-gray-400 font-bold uppercase">Téléphone</div>
-                        <div id="v-phone-txt" class="font-medium text-gray-800"></div>
-                    </div>
+                    <div class="flex-1"><div class="text-xs text-gray-400 font-bold uppercase">Téléphone</div><div id="v-phone-txt" class="font-medium text-gray-800"></div></div>
                     <i class="fas fa-chevron-right text-gray-300"></i>
                 </a>
                 <a href="#" id="link-email" class="widget-card">
                     <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xl"><i class="fas fa-envelope"></i></div>
-                    <div class="flex-1">
-                        <div class="text-xs text-gray-400 font-bold uppercase">Email</div>
-                        <div id="v-email-txt" class="font-medium text-gray-800 break-all"></div>
-                    </div>
+                    <div class="flex-1"><div class="text-xs text-gray-400 font-bold uppercase">Email</div><div id="v-email-txt" class="font-medium text-gray-800 break-all"></div></div>
                     <i class="fas fa-chevron-right text-gray-300"></i>
                 </a>
                 <a href="#" id="link-web" target="_blank" class="widget-card">
                     <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xl"><i class="fas fa-globe"></i></div>
-                    <div class="flex-1">
-                        <div class="text-xs text-gray-400 font-bold uppercase">Site Web</div>
-                        <div id="v-web-txt" class="font-medium text-gray-800 break-all"></div>
-                    </div>
+                    <div class="flex-1"><div class="text-xs text-gray-400 font-bold uppercase">Site Web</div><div id="v-web-txt" class="font-medium text-gray-800 break-all"></div></div>
                     <i class="fas fa-chevron-right text-gray-300"></i>
                 </a>
                 <a href="#" id="link-linkedin" target="_blank" class="widget-card">
                     <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xl"><i class="fab fa-linkedin-in"></i></div>
-                    <div class="flex-1">
-                        <div class="text-xs text-gray-400 font-bold uppercase">LinkedIn</div>
-                        <div class="font-medium text-gray-800">Voir le profil</div>
-                    </div>
+                    <div class="flex-1"><div class="text-xs text-gray-400 font-bold uppercase">LinkedIn</div><div class="font-medium text-gray-800">Voir le profil</div></div>
                     <i class="fas fa-chevron-right text-gray-300"></i>
                 </a>
             </div>
         </div>
 
-        <!-- Bouton Flottant Édition -->
-        <button onclick="toggleEditMode()" class="fixed bottom-6 right-6 w-14 h-14 bg-white rounded-full shadow-xl flex items-center justify-center text-gray-600 hover:text-blue-600 z-40 transition hover:scale-110">
-            <i class="fas fa-pen text-xl"></i>
+        <!-- Bouton Flottant Édition Plus Visible -->
+        <button onclick="attemptEdit()" class="edit-trigger">
+            <i class="fas fa-pen text-blue-600"></i>
+            <span>Modifier</span>
         </button>
     </div>
 
-    <!-- ================= VUE ÉDITEUR (DASHBOARD) ================= -->
+    <!-- ================= VUE ÉDITEUR ================= -->
     <div id="edit-mode">
-        <!-- Top Bar -->
         <div class="max-w-5xl mx-auto pt-8 px-4 sm:px-6 lg:px-8">
             <h1 class="text-3xl font-bold text-gray-900 mb-6">Ma carte</h1>
             <div class="flex flex-wrap justify-between items-center gap-4 mb-8">
@@ -219,7 +228,12 @@
                     
                     <div class="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-100">
                         <label class="text-xs font-bold text-gray-500 uppercase">Identifiant (ID)</label>
-                        <input type="text" id="f-id" class="w-full bg-white border border-gray-300 rounded p-2 text-gray-500 cursor-not-allowed text-sm mb-2" readonly>
+                        <input type="text" id="f-id" class="w-full bg-white border border-gray-300 rounded p-2 text-gray-500 cursor-not-allowed text-sm mb-4" readonly>
+                        
+                        <!-- NOUVEAU CHAMP CODE SECRET -->
+                        <label class="text-xs font-bold text-gray-500 uppercase">Code Secret (Pour modifier)</label>
+                        <input type="text" id="f-code" class="w-full bg-white border border-gray-300 rounded p-2 text-gray-800 text-sm mb-4" placeholder="Définissez un mot de passe">
+                        
                         <button onclick="resendEmail()" id="btn-email" class="text-sm text-blue-600 font-bold hover:underline"><i class="fas fa-envelope mr-1"></i> Renvoyer mes accès</button>
                     </div>
                 </div>
@@ -231,7 +245,6 @@
                         <div class="input-file-wrapper">
                             <button class="btn-add" onclick="triggerFileInput('photo')">Choisir & Recadrer</button>
                             <span id="name-photo" class="text-sm text-gray-500 ml-3 truncate">Aucun fichier</span>
-                            <!-- L'input déclenche la fonction openCropper au lieu de handleFile direct -->
                             <input type="file" id="upl-photo" class="hidden" accept="image/*" onchange="openCropper(event, 'photo', 1/1)">
                         </div>
                         <input type="hidden" id="f-photo_url">
@@ -245,7 +258,6 @@
                         <div class="input-file-wrapper">
                             <button class="btn-add" onclick="triggerFileInput('logo')">Choisir</button>
                             <span id="name-logo" class="text-sm text-gray-500 ml-3 truncate">Aucun fichier</span>
-                            <!-- Le logo n'a pas besoin de recadrage carré strict, mais on peut l'ajouter si voulu -->
                             <input type="file" id="upl-logo" class="hidden" accept="image/*" onchange="handleFile(event, 'logo')">
                         </div>
                         <input type="hidden" id="f-logo_url">
@@ -255,7 +267,6 @@
                         <div class="input-file-wrapper">
                             <button class="btn-add" onclick="triggerFileInput('banner')">Choisir & Recadrer</button>
                             <span id="name-banner" class="text-sm text-gray-500 ml-3 truncate">Aucun fichier</span>
-                            <!-- Ratio bannière environ 16:9 ou libre -->
                             <input type="file" id="upl-banner" class="hidden" accept="image/*" onchange="openCropper(event, 'banner', 16/9)">
                         </div>
                         <input type="hidden" id="f-banner_url">
@@ -286,15 +297,15 @@
 
         let currentUser = {};
         let uploadQueue = {};
-        
-        // Variables Cropper
         let cropperInstance = null;
         let currentCropType = null;
+        let authCode = ""; // Stocke le code une fois validé
 
         window.onload = async function() {
             const urlParams = new URLSearchParams(window.location.search);
             const userId = urlParams.get('id');
             const editMode = urlParams.get('edit');
+            const codeFromUrl = urlParams.get('code'); // Code passé par l'email
 
             if(userId) {
                 try {
@@ -303,8 +314,15 @@
                     const user = data.find(u => u.id == userId);
                     if(user) {
                         currentUser = user;
-                        if(!user.nom && !user.prenom) { fillEditor(user); toggleEditMode(true); }
-                        else { renderCard(user); fillEditor(user); if(editMode === 'true') toggleEditMode(true); }
+                        if(codeFromUrl) authCode = codeFromUrl; // Auto-login si lien email
+
+                        if(!user.nom && !user.prenom) { 
+                            fillEditor(user); toggleEditMode(true); 
+                        } else { 
+                            renderCard(user); 
+                            fillEditor(user); 
+                            if(editMode === 'true' && codeFromUrl) toggleEditMode(true);
+                        }
                     } else {
                         currentUser.id = userId; fillEditor(currentUser); toggleEditMode(true);
                         document.getElementById('v-name').textContent = "Profil introuvable";
@@ -356,9 +374,48 @@
             setValue('f-logo_url', data.logo_url);
             setValue('f-banner_url', data.banner_url);
             
+            // Le code secret n'est pas rempli pour sécurité, l'utilisateur doit le remettre s'il veut le changer
+            // ou s'il a été récupéré via l'URL (on ne l'affiche pas dans le champ)
+            
             if(data.photo_url) setText('name-photo', 'Image actuelle');
             if(data.logo_url) setText('name-logo', 'Logo actuel');
             if(data.banner_url) setText('name-banner', 'Bannière actuelle');
+        }
+
+        // --- GESTION ACCES SECURISE ---
+        function attemptEdit() {
+            // Si l'utilisateur n'est pas protégé (is_protected est faux) ou si on a déjà le code
+            if (!currentUser.is_protected || authCode) {
+                toggleEditMode(true);
+            } else {
+                document.getElementById('auth-modal').style.display = 'flex';
+                document.getElementById('auth-code-input').value = '';
+                document.getElementById('auth-error').classList.add('hidden');
+            }
+        }
+
+        function closeAuthModal() {
+            document.getElementById('auth-modal').style.display = 'none';
+        }
+
+        function submitAuthCode() {
+            const code = document.getElementById('auth-code-input').value;
+            if(!code) return;
+
+            // Vérification simple côté serveur via une requête spéciale
+            fetch(API_URL, {
+                method: 'POST', mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'verify', id: currentUser.id, code: code })
+            }).then(() => {
+                // Avec no-cors on ne peut pas lire la réponse, mais dans notre cas simplifié :
+                // On va stocker le code et tenter d'ouvrir. Si la sauvegarde échoue plus tard, c'est que le code était faux.
+                // NOTE: Idéalement on attendrait une réponse JSON valide, mais avec Apps Script "simple", c'est dur.
+                // ASTUCE : On considère que c'est bon temporairement pour l'UX. Le vrai check est au SAVE.
+                authCode = code;
+                closeAuthModal();
+                toggleEditMode(true);
+            });
         }
 
         function toggleEditMode(forceOpen = false) {
@@ -372,100 +429,30 @@
             }
         }
 
-        function openTab(tabId, btn) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(el => {
-                el.classList.remove('active', 'border-blue-600', 'text-blue-600');
-                el.classList.add('text-gray-500', 'border-transparent');
-            });
-            document.getElementById(tabId).classList.remove('hidden');
-            btn.classList.remove('text-gray-500', 'border-transparent');
-            btn.classList.add('active', 'border-blue-600', 'text-blue-600');
+        // --- PARTAGE ---
+        function openShareModal() {
+            const link = window.location.href.split('&')[0]; // Enlève les params edit/code
+            document.getElementById('share-link-text').textContent = link;
+            document.getElementById('share-modal').style.display = 'flex';
+            
+            // Liens sociaux
+            document.getElementById('share-wa').href = `https://wa.me/?text=${encodeURIComponent(link)}`;
+            document.getElementById('share-mail').href = `mailto:?subject=Ma Carte&body=${encodeURIComponent(link)}`;
+            document.getElementById('share-li').href = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(link)}`;
         }
 
-        function triggerFileInput(type) {
-            document.getElementById('upl-' + type).click();
+        function copyLink() {
+            const link = document.getElementById('share-link-text').textContent;
+            navigator.clipboard.writeText(link);
+            alert("Lien copié !");
         }
 
-        // --- GESTION CROPPER ---
-        function openCropper(event, type, aspectRatio) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            currentCropType = type;
-            document.getElementById('name-' + type).textContent = file.name;
-
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = function(e) {
-                const imageElement = document.getElementById('image-to-crop');
-                imageElement.src = e.target.result;
-                
-                // Afficher modale
-                document.getElementById('crop-modal').style.display = 'flex';
-
-                // Détruire instance précédente si existe
-                if(cropperInstance) cropperInstance.destroy();
-
-                // Créer nouvelle instance Cropper
-                cropperInstance = new Cropper(imageElement, {
-                    aspectRatio: aspectRatio, // 1 pour photo (carré), libre ou 16/9 pour bannière
-                    viewMode: 1,
-                    autoCropArea: 1,
-                });
-            };
+        function downloadQr() {
+            const link = document.getElementById('share-link-text').textContent;
+            window.open(`https://quickchart.io/qr?size=300&text=${encodeURIComponent(link)}`, '_blank');
         }
 
-        function closeCropper() {
-            document.getElementById('crop-modal').style.display = 'none';
-            if(cropperInstance) {
-                cropperInstance.destroy();
-                cropperInstance = null;
-            }
-            // Reset input value pour permettre de resélectionner le même fichier si besoin
-            if(currentCropType) document.getElementById('upl-' + currentCropType).value = '';
-        }
-
-        function cropAndSave() {
-            if(!cropperInstance) return;
-
-            // Obtenir l'image recadrée
-            const canvas = cropperInstance.getCroppedCanvas({
-                width: 800, // Largeur max finale
-                height: 800, // Hauteur max finale (proportionnelle en réalité)
-            });
-
-            // Convertir en JPEG compressé
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-
-            // Sauvegarder dans la queue d'upload
-            uploadQueue[currentCropType] = {
-                data: dataUrl,
-                mime: 'image/jpeg',
-                name: 'crop_' + Date.now() + '.jpg'
-            };
-
-            // Fermer modale
-            closeCropper();
-        }
-
-        // Gestion Upload Simple (sans crop, ex: Logo)
-        function handleFile(event, type) {
-            const file = event.target.files[0];
-            if(!file) return;
-            document.getElementById('name-' + type).textContent = file.name;
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = function(e) {
-                uploadQueue[type] = {
-                    data: e.target.result, // Pas de compression ici pour le logo (garder qualité/transparence)
-                    mime: file.type,
-                    name: file.name
-                };
-            }
-        }
-
-        // --- SAUVEGARDE & EMAIL ---
+        // --- UPLOAD & SAUVEGARDE ---
         function saveData() {
             const btn = document.getElementById('btn-save');
             const originalText = btn.innerHTML;
@@ -473,10 +460,13 @@
             btn.disabled = true;
 
             const id = getValue('f-id');
+            const secret = getValue('f-code') || authCode; // Nouveau code ou code actuel
+
             if(!id) { alert("ID manquant"); return; }
 
             let payload = {
                 id: id,
+                secret_code: secret, // On envoie le code pour validation/sauvegarde
                 prenom: getValue('f-prenom'), nom: getValue('f-nom'),
                 societe: getValue('f-societe'), poste: getValue('f-poste'),
                 description: getValue('f-desc'), telephone: getValue('f-telephone'),
@@ -495,26 +485,63 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             }).then(() => {
-                alert("Sauvegardé !"); btn.innerHTML = originalText; btn.disabled = false;
-                currentUser = {...currentUser, ...payload}; location.reload();
+                alert("Sauvegardé avec succès !"); 
+                btn.innerHTML = originalText; btn.disabled = false;
+                authCode = secret; // Mettre à jour le code en mémoire
+                currentUser = {...currentUser, ...payload, is_protected: !!secret}; 
+                location.reload();
             }).catch(err => {
                 console.error(err); alert("Erreur réseau"); btn.innerHTML = originalText; btn.disabled = false;
             });
         }
 
+        // --- UTILITAIRES DE BASE ---
+        function openTab(tabId, btn) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('active', 'border-blue-600', 'text-blue-600');
+                el.classList.add('text-gray-500', 'border-transparent');
+            });
+            document.getElementById(tabId).classList.remove('hidden');
+            btn.classList.remove('text-gray-500', 'border-transparent');
+            btn.classList.add('active', 'border-blue-600', 'text-blue-600');
+        }
+        function triggerFileInput(type) { document.getElementById('upl-' + type).click(); }
+        
+        // Cropper & Upload handlers (identiques version précédente)
+        function openCropper(event, type, aspectRatio) {
+            const file = event.target.files[0]; if(!file) return;
+            currentCropType = type; document.getElementById('name-' + type).textContent = file.name;
+            const reader = new FileReader(); reader.readAsDataURL(file);
+            reader.onload = function(e) {
+                document.getElementById('image-to-crop').src = e.target.result;
+                document.getElementById('crop-modal').style.display = 'flex';
+                if(cropperInstance) cropperInstance.destroy();
+                cropperInstance = new Cropper(document.getElementById('image-to-crop'), { aspectRatio: aspectRatio, viewMode: 1, autoCropArea: 1 });
+            };
+        }
+        function closeCropper() { document.getElementById('crop-modal').style.display = 'none'; if(cropperInstance) { cropperInstance.destroy(); cropperInstance = null; } }
+        function cropAndSave() {
+            if(!cropperInstance) return;
+            const canvas = cropperInstance.getCroppedCanvas({ width: 800, height: 800 });
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+            uploadQueue[currentCropType] = { data: dataUrl, mime: 'image/jpeg', name: 'crop.jpg' };
+            closeCropper();
+        }
+        function handleFile(event, type) {
+            const file = event.target.files[0]; if(!file) return;
+            document.getElementById('name-' + type).textContent = file.name;
+            const reader = new FileReader(); reader.readAsDataURL(file);
+            reader.onload = function(e) { uploadQueue[type] = { data: e.target.result, mime: file.type, name: file.name }; }
+        }
         function resendEmail() {
-            const btn = document.getElementById('btn-email');
-            const originalHTML = btn.innerHTML;
-            const email = getValue('f-email');
-            if(!email) { alert("Email manquant"); return; }
-            btn.innerHTML = 'Envoi...';
-            fetch(API_URL, {
-                method: 'POST', mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: currentUser.id, email: email, send_email: true })
-            }).then(() => { alert("Email envoyé !"); btn.innerHTML = originalHTML; });
+            const email = getValue('f-email'); if(!email) return alert("Email manquant");
+            const btn = document.getElementById('btn-email'); btn.innerHTML = 'Envoi...';
+            fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({id: currentUser.id, email: email, send_email: true, secret_code: authCode}) })
+            .then(() => { alert("Email envoyé !"); btn.innerHTML = '<i class="fas fa-envelope mr-1"></i> Renvoyer mes accès'; });
         }
 
+        // Helpers
         function setText(id, txt) { const el = document.getElementById(id); if(el) el.textContent = txt || ''; }
         function getValue(id) { return document.getElementById(id).value; }
         function setValue(id, val) { const el = document.getElementById(id); if(el) el.value = val || ''; }
@@ -528,20 +555,10 @@
         }
         function downloadVCard() {
             if(!currentUser.nom) return;
-            const vcard = `BEGIN:VCARD
-VERSION:3.0
-FN:${currentUser.prenom || ''} ${currentUser.nom || ''}
-N:${currentUser.nom};${currentUser.prenom || ''};;;
-TITLE:${currentUser.poste || ''}
-ORG:${currentUser.societe || ''}
-TEL;TYPE=CELL:${currentUser.telephone || ''}
-EMAIL:${currentUser.email || ''}
-URL:${currentUser.site_web || ''}
-END:VCARD`;
+            const vcard = `BEGIN:VCARD\nVERSION:3.0\nFN:${currentUser.prenom||''} ${currentUser.nom||''}\nN:${currentUser.nom};${currentUser.prenom};;;\nTITLE:${currentUser.poste||''}\nORG:${currentUser.societe||''}\nTEL;TYPE=CELL:${currentUser.telephone||''}\nEMAIL:${currentUser.email||''}\nURL:${currentUser.site_web||''}\nEND:VCARD`;
             const blob = new Blob([vcard], { type: 'text/vcard' });
             const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; a.download = 'contact.vcf'; a.click();
+            const a = document.createElement('a'); a.href = url; a.download = 'contact.vcf'; a.click();
         }
     </script>
 </body>
