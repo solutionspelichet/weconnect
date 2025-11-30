@@ -77,7 +77,7 @@
                 <button onclick="closeAuthModal()" class="flex-1 py-3 text-gray-600 font-bold bg-gray-100 rounded-lg">Annuler</button>
                 <button onclick="submitAuthCode()" class="flex-1 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700">Valider</button>
             </div>
-            <p id="auth-error" class="text-red-500 text-xs mt-3 hidden">Code incorrect</p>
+            <p id="auth-error" class="text-red-500 text-xs mt-3 hidden">Code incorrect. Veuillez réessayer.</p>
         </div>
     </div>
 
@@ -117,7 +117,7 @@
 
     <!-- MODALE CROPPER -->
     <div id="crop-modal" class="modal-overlay">
-        <div class="modal-content !max-w-lg"> <!-- Slightly wider -->
+        <div class="modal-content !max-w-lg">
             <div class="p-4 border-b flex justify-between items-center bg-gray-50">
                 <h3 class="font-bold text-gray-800">Recadrer l'image</h3>
                 <button onclick="closeCropper()" class="text-gray-500 hover:text-black"><i class="fas fa-times"></i></button>
@@ -136,7 +136,6 @@
     <div id="view-mode">
         <div class="header-bg" id="v-header-bg">
             <img id="v-logo-img" src="" style="display:none; height: 40px; object-fit: contain;">
-            <!-- NOM APPLICATION : WeLink -->
             <div id="v-logo-text" class="text-white font-bold text-xl tracking-wider uppercase">WeLink</div>
         </div>
 
@@ -185,7 +184,6 @@
             </div>
         </div>
 
-        <!-- Bouton Flottant Édition Plus Visible -->
         <button onclick="attemptEdit()" class="edit-trigger">
             <i class="fas fa-pen text-blue-600"></i>
             <span>Modifier</span>
@@ -382,7 +380,7 @@
             if(data.banner_url) setText('name-banner', 'Bannière actuelle');
         }
 
-        // --- GESTION ACCES SECURISE ---
+        // --- GESTION ACCES SECURISE (CORRIGÉ) ---
         function attemptEdit() {
             // Si l'utilisateur n'est pas protégé (is_protected est faux) ou si on a déjà le code
             if (!currentUser.is_protected || authCode) {
@@ -401,20 +399,34 @@
         function submitAuthCode() {
             const code = document.getElementById('auth-code-input').value;
             if(!code) return;
+            
+            // On vérifie le code via GET pour éviter les soucis de CORS/no-cors
+            const verifyUrl = `${API_URL}?action=verify&id=${currentUser.id}&code=${encodeURIComponent(code)}`;
+            
+            const btn = event.target;
+            const originalText = btn.innerText;
+            btn.innerText = "Vérification...";
+            btn.disabled = true;
 
-            // Vérification simple côté serveur via une requête spéciale
-            fetch(API_URL, {
-                method: 'POST', mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'verify', id: currentUser.id, code: code })
-            }).then(() => {
-                // Avec no-cors on ne peut pas lire la réponse, mais dans notre cas simplifié :
-                // On va stocker le code et tenter d'ouvrir. Si la sauvegarde échoue plus tard, c'est que le code était faux.
-                // NOTE: Idéalement on attendrait une réponse JSON valide, mais avec Apps Script "simple", c'est dur.
-                // ASTUCE : On considère que c'est bon temporairement pour l'UX. Le vrai check est au SAVE.
-                authCode = code;
-                closeAuthModal();
-                toggleEditMode(true);
+            fetch(verifyUrl)
+            .then(res => res.json())
+            .then(data => {
+                btn.innerText = originalText;
+                btn.disabled = false;
+                
+                if (data.result === 'success') {
+                    authCode = code; // On stocke le code validé
+                    closeAuthModal();
+                    toggleEditMode(true);
+                } else {
+                    document.getElementById('auth-error').classList.remove('hidden');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                btn.innerText = originalText;
+                btn.disabled = false;
+                alert("Erreur de connexion serveur.");
             });
         }
 
@@ -460,13 +472,15 @@
             btn.disabled = true;
 
             const id = getValue('f-id');
-            const secret = getValue('f-code') || authCode; // Nouveau code ou code actuel
-
             if(!id) { alert("ID manquant"); return; }
 
+            // CORRECTION IMPORTANTE : 
+            // 'auth_code' = Le code actuel pour prouver qu'on a le droit de modifier
+            // 'secret_code' = Le NOUVEAU code que l'utilisateur a écrit dans le champ (s'il veut le changer)
+            
             let payload = {
                 id: id,
-                secret_code: secret, // On envoie le code pour validation/sauvegarde
+                auth_code: authCode, // Preuve d'identité
                 prenom: getValue('f-prenom'), nom: getValue('f-nom'),
                 societe: getValue('f-societe'), poste: getValue('f-poste'),
                 description: getValue('f-desc'), telephone: getValue('f-telephone'),
@@ -475,6 +489,10 @@
                 photo_url: getValue('f-photo_url'), logo_url: getValue('f-logo_url'),
                 banner_url: getValue('f-banner_url')
             };
+
+            // On n'envoie le secret_code que s'il est rempli (pour le changer ou le définir)
+            const newSecret = getValue('f-code');
+            if(newSecret) payload.secret_code = newSecret;
 
             if(uploadQueue['photo']) payload.photo_data = uploadQueue['photo'].data;
             if(uploadQueue['logo']) payload.logo_data = uploadQueue['logo'].data;
@@ -487,8 +505,11 @@
             }).then(() => {
                 alert("Sauvegardé avec succès !"); 
                 btn.innerHTML = originalText; btn.disabled = false;
-                authCode = secret; // Mettre à jour le code en mémoire
-                currentUser = {...currentUser, ...payload, is_protected: !!secret}; 
+                
+                // Si on a changé le mot de passe, on met à jour authCode pour continuer à éditer sans recharger
+                if(newSecret) authCode = newSecret;
+                
+                currentUser = {...currentUser, ...payload, is_protected: !!(authCode || newSecret)}; 
                 location.reload();
             }).catch(err => {
                 console.error(err); alert("Erreur réseau"); btn.innerHTML = originalText; btn.disabled = false;
