@@ -6,7 +6,7 @@
     
     <!-- PWA Settings -->
     <meta name="theme-color" content="#ffffff">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="WeLink">
     
@@ -19,8 +19,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Manifest JSON (Intégré pour GitHub Pages) -->
-    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIldlTGluayAtIENhcnRlIERpZ2l0YWxlIiwKICAic2hvcnRfbmFtZSI6ICJXZUxpbmsiLAogICJzdGFydF91cmwiOiAiLi8iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmZmZmZmYiLAogICJ0aGVtZV9jb2xvciI6ICIjZmZmZmZmIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly92aWEucGxhY2Vob2xkZXIuY29tLzE5Mi5wbmc/dGV4dD1XTCIsCiAgICAgICJzaXplcyI6ICIxOTJ4MTkyIiwKICAgICAgInR5cGUiOiAiaW1hZ2UvcG5nIgogICAgfSwKICAgIHsKICAgICAgInNyYyI6ICJodHRwczovL3ZpYS5wbGFjZWhvbGRlci5jb20vNTEyLnBuZz90ZXh0PVdMIiwKICAgICAgInNpemVzIjogIjUxMng1MTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9wbmciCiAgICB9CiAgXQp9">
+    <!-- Manifest JSON -->
+    <link rel="manifest" href="manifest.json">
 
     <style>
         :root { --primary-color: #3b82f6; --bg-color: #f0f2f5; --card-bg: #ffffff; --header-bg: #000000; }
@@ -148,7 +148,7 @@
         </div>
 
         <div class="flex flex-col items-center px-5 relative z-10 flex-1">
-            <img id="v-photo" src="https://via.placeholder.com/150" class="profile-img">
+            <img id="v-photo" src="https://placehold.co/150" class="profile-img">
             
             <div class="text-center mt-4 mb-6">
                 <h1 id="v-name" class="text-2xl font-bold text-gray-900"></h1>
