@@ -3,16 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- PWA Settings -->
+    <meta name="theme-color" content="#ffffff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="WeLink">
+    
     <title>WeLink - Ma Carte Digitale</title>
+    
+    <!-- Icônes -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     
+    <!-- Manifest JSON (Intégré pour GitHub Pages) -->
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIldlTGluayAtIENhcnRlIERpZ2l0YWxlIiwKICAic2hvcnRfbmFtZSI6ICJXZUxpbmsiLAogICJzdGFydF91cmwiOiAiLi8iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiNmZmZmZmYiLAogICJ0aGVtZV9jb2xvciI6ICIjZmZmZmZmIiwKICAiaWNvbnMiOiBbCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly92aWEucGxhY2Vob2xkZXIuY29tLzE5Mi5wbmc/dGV4dD1XTCIsCiAgICAgICJzaXplcyI6ICIxOTJ4MTkyIiwKICAgICAgInR5cGUiOiAiaW1hZ2UvcG5nIgogICAgfSwKICAgIHsKICAgICAgInNyYyI6ICJodHRwczovL3ZpYS5wbGFjZWhvbGRlci5jb20vNTEyLnBuZz90ZXh0PVdMIiwKICAgICAgInNpemVzIjogIjUxMng1MTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9wbmciCiAgICB9CiAgXQp9">
+
     <style>
         :root { --primary-color: #3b82f6; --bg-color: #f0f2f5; --card-bg: #ffffff; --header-bg: #000000; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); overscroll-behavior-y: none; }
+
+        /* PWA Install Prompt */
+        #pwa-install-prompt {
+            display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: #2563eb; color: white; padding: 12px 24px; border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4); z-index: 1000;
+            font-weight: 600; cursor: pointer; animation: slideUp 0.5s ease-out;
+            align-items: center; gap: 10px; width: max-content;
+        }
+        @keyframes slideUp { from { transform: translate(-50%, 100px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
 
         #view-mode { max-width: 480px; margin: 0 auto; min-height: 100vh; background: white; box-shadow: 0 0 20px rgba(0,0,0,0.05); display: flex; flex-direction: column; position: relative; }
         .header-bg { height: 140px; background-color: black; border-radius: 0 0 30px 30px; display: flex; align-items: flex-start; padding: 20px; background-size: cover; background-position: center; }
@@ -46,6 +68,11 @@
         <div class="text-gray-500 font-medium">Chargement...</div>
     </div>
 
+    <!-- PWA INSTALL PROMPT -->
+    <div id="pwa-install-prompt" onclick="installPWA()">
+        <i class="fas fa-download"></i> Installer l'application
+    </div>
+
     <!-- MODALE AUTHENTIFICATION -->
     <div id="auth-modal" class="modal-overlay">
         <div class="modal-content p-6 text-center">
@@ -61,7 +88,7 @@
         </div>
     </div>
 
-    <!-- MODALE AFFICHAGE QR CODE (NOUVEAU) -->
+    <!-- MODALE AFFICHAGE QR CODE -->
     <div id="qr-display-modal" class="modal-overlay">
         <div class="modal-content p-6 text-center">
             <div class="flex justify-between items-center mb-4">
@@ -243,6 +270,43 @@
         </div>
     </div>
 
+    <!-- PWA Service Worker Logic -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(registration => {
+                        console.log('SW enregistré:', registration);
+                    })
+                    .catch(error => {
+                        console.log('SW échec:', error);
+                    });
+            });
+        }
+
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const installBtn = document.getElementById('pwa-install-prompt');
+            if (installBtn) installBtn.style.display = 'flex';
+        });
+
+        function installPWA() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('PWA installée');
+                    }
+                    deferredPrompt = null;
+                    document.getElementById('pwa-install-prompt').style.display = 'none';
+                });
+            }
+        }
+    </script>
+
+    <!-- LOGIQUE EXISTANTE -->
     <script>
         const API_URL = 'https://script.google.com/macros/s/AKfycbz12V16okyQngAw7QCUeRZNsbI4jy5aH4vfSk-kxL3jl1Dl3P-f0pAxlX0CKtQgZnGE8A/exec'; 
         let currentUser = {}; let uploadQueue = {}; let cropperInstance = null; let currentCropType = null; let authCode = "";
@@ -307,7 +371,6 @@
             const qrUrl = `https://quickchart.io/qr?size=500&margin=1&text=${encodeURIComponent(link)}`;
             document.getElementById('qr-display-img').src = qrUrl;
             document.getElementById('qr-display-modal').style.display = 'flex';
-            // On cache la modale de partage si elle était ouverte
             document.getElementById('share-modal').style.display = 'none';
         }
 
@@ -326,7 +389,7 @@
             document.getElementById('share-wa').href = `https://wa.me/?text=${encodeURIComponent(link)}`; document.getElementById('share-mail').href = `mailto:?subject=Ma Carte&body=${encodeURIComponent(link)}`; document.getElementById('share-li').href = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(link)}`;
         }
         function copyLink() { navigator.clipboard.writeText(document.getElementById('share-link-text').textContent); alert("Copié !"); }
-        function downloadQr() { openQrModal(); } // Ouvre maintenant la modale d'affichage
+        function downloadQr() { openQrModal(); }
 
         function saveData() {
             const btn = document.getElementById('btn-save'); const originalText = btn.innerHTML; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true;
