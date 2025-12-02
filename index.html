@@ -29,8 +29,8 @@
         /* PWA Install Prompt */
         #pwa-install-prompt {
             display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            background: #2563eb; color: white; padding: 12px 24px; border-radius: 50px;
-            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4); z-index: 1000;
+            background: var(--primary-color); color: white; padding: 12px 24px; border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); z-index: 1000;
             font-weight: 600; cursor: pointer; animation: slideUp 0.5s ease-out;
             align-items: center; gap: 10px; width: max-content;
         }
@@ -39,12 +39,20 @@
         #view-mode { max-width: 480px; margin: 0 auto; min-height: 100vh; background: white; box-shadow: 0 0 20px rgba(0,0,0,0.05); display: flex; flex-direction: column; position: relative; }
         .header-bg { height: 140px; background-color: black; border-radius: 0 0 30px 30px; display: flex; align-items: flex-start; padding: 20px; background-size: cover; background-position: center; }
         .profile-img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid white; box-shadow: 0 8px 16px rgba(0,0,0,0.1); background-color: #e5e7eb; margin-top: -60px; }
+        
+        /* Widget Card avec couleur dynamique au survol/active */
         .widget-card { background: white; border: 1px solid #f3f4f6; border-radius: 16px; padding: 16px; display: flex; align-items: center; gap: 16px; margin-bottom: 15px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: transform 0.1s; text-decoration: none; color: inherit; }
         .widget-card:active { transform: scale(0.98); }
+        .widget-icon { width: 40px; height: 40px; background-color: #eff6ff; color: var(--primary-color); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+
+        /* Textes colorés dynamiquement */
+        .text-primary { color: var(--primary-color); }
+        .bg-primary { background-color: var(--primary-color); }
+        .border-primary { border-color: var(--primary-color); }
         
         #edit-mode { display: none; background-color: #f8f9fa; min-height: 100vh; padding-bottom: 50px; }
         .tab-btn { border-bottom: 2px solid transparent; transition: all 0.2s; }
-        .tab-btn.active { border-bottom-color: #2563eb; color: #2563eb; }
+        .tab-btn.active { border-bottom-color: var(--primary-color); color: var(--primary-color); }
         .input-file-wrapper { display: flex; align-items: center; gap: 10px; }
         .fake-file-input { flex: 1; border: 1px solid #d1d5db; border-radius: 6px; padding: 10px; background: white; color: #4b5563; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; }
         .btn-add { background: #e5e7eb; color: #374151; font-weight: 600; padding: 10px 20px; border-radius: 6px; font-size: 0.9rem; transition: background 0.2s; }
@@ -58,13 +66,16 @@
         .cropper-view-box, .cropper-face { border-radius: 0; }
 
         .edit-trigger { position: fixed; bottom: 30px; right: 20px; background: white; border-radius: 50px; padding: 12px 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 10px; cursor: pointer; z-index: 40; color: #374151; font-weight: 700; font-size: 0.95rem; border: 1px solid #f3f4f6; transition: all 0.2s; }
-        .edit-trigger:hover { transform: translateY(-2px); color: var(--primary-color); box-shadow: 0 6px 20px rgba(59,130,246,0.2); }
+        .edit-trigger:hover { transform: translateY(-2px); color: var(--primary-color); box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
+        
+        /* Boutons Actions Custom */
+        .btn-action-primary { background-color: var(--primary-color); color: white; }
     </style>
 </head>
 <body>
 
     <div id="loader" class="loader">
-        <i class="fas fa-circle-notch fa-spin text-4xl text-blue-600 mb-4"></i>
+        <i class="fas fa-circle-notch fa-spin text-4xl text-blue-600 mb-4" style="color: var(--primary-color);"></i>
         <div class="text-gray-500 font-medium">Chargement...</div>
     </div>
 
@@ -76,13 +87,13 @@
     <!-- MODALE AUTHENTIFICATION -->
     <div id="auth-modal" class="modal-overlay">
         <div class="modal-content p-6 text-center">
-            <i class="fas fa-lock text-3xl text-blue-600 mb-4"></i>
+            <i class="fas fa-lock text-3xl mb-4 text-primary"></i>
             <h3 class="text-xl font-bold text-gray-800 mb-2">Modification protégée</h3>
             <p class="text-gray-500 text-sm mb-6">Entrez votre code secret pour modifier.</p>
             <input type="password" id="auth-code-input" class="w-full border border-gray-300 rounded-lg p-3 mb-4 text-center text-lg tracking-widest outline-none focus:border-blue-500" placeholder="Code Secret">
             <div class="flex gap-3">
                 <button onclick="closeAuthModal()" class="flex-1 py-3 text-gray-600 font-bold bg-gray-100 rounded-lg">Annuler</button>
-                <button onclick="submitAuthCode()" class="flex-1 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700">Valider</button>
+                <button onclick="submitAuthCode()" class="flex-1 py-3 text-white font-bold rounded-lg hover:opacity-90 btn-action-primary">Valider</button>
             </div>
             <p id="auth-error" class="text-red-500 text-xs mt-3 hidden">Code incorrect</p>
         </div>
@@ -99,7 +110,7 @@
                 <img id="qr-display-img" src="" alt="QR Code" class="w-64 h-64 border border-gray-200 rounded-lg bg-white p-2">
             </div>
             <p class="text-sm text-gray-500 mb-4">Scannez ce code pour accéder à ma carte.</p>
-            <button onclick="downloadQrFile()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition shadow-md flex justify-center items-center gap-2">
+            <button onclick="downloadQrFile()" class="w-full text-white font-bold py-3 rounded-lg hover:opacity-90 transition shadow-md flex justify-center items-center gap-2 btn-action-primary">
                 <i class="fas fa-download"></i> Télécharger l'image
             </button>
         </div>
@@ -114,7 +125,7 @@
             </div>
             <div class="bg-gray-100 p-3 rounded-lg flex items-center justify-between mb-4">
                 <span id="share-link-text" class="text-sm text-gray-600 truncate mr-2">...</span>
-                <button onclick="copyLink()" class="text-blue-600 font-bold text-sm">COPIER</button>
+                <button onclick="copyLink()" class="font-bold text-sm text-primary">COPIER</button>
             </div>
             <div class="grid grid-cols-4 gap-4 text-center">
                 <a id="share-wa" href="#" target="_blank" class="flex flex-col items-center gap-1 text-gray-600 hover:text-green-500"><div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-xl"><i class="fab fa-whatsapp"></i></div><span class="text-xs">WhatsApp</span></a>
@@ -135,7 +146,7 @@
             <div class="crop-area"><img id="image-to-crop" src="" style="max-width: 100%; display: block;"></div>
             <div class="p-4 flex justify-end gap-3 bg-gray-50">
                 <button onclick="closeCropper()" class="px-4 py-2 text-gray-600 font-bold hover:bg-gray-200 rounded">Annuler</button>
-                <button onclick="cropAndSave()" class="px-6 py-2 bg-blue-600 text-white font-bold rounded shadow hover:bg-blue-700">Valider</button>
+                <button onclick="cropAndSave()" class="px-6 py-2 text-white font-bold rounded shadow hover:opacity-90 btn-action-primary">Valider</button>
             </div>
         </div>
     </div>
@@ -153,13 +164,13 @@
             <div class="text-center mt-4 mb-6">
                 <h1 id="v-name" class="text-2xl font-bold text-gray-900"></h1>
                 <p id="v-title" class="text-gray-600 text-lg"></p>
-                <div id="v-company" class="text-blue-600 font-semibold mt-1"></div>
+                <div id="v-company" class="font-semibold mt-1 text-primary"></div>
                 <p id="v-desc" class="text-sm text-gray-500 mt-2 italic max-w-xs mx-auto"></p>
             </div>
 
             <!-- BOUTONS ACTIONS -->
             <div class="grid grid-cols-2 gap-4 w-full mb-4">
-                <button onclick="downloadVCard()" class="bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg flex flex-col items-center justify-center gap-1 active:scale-95 transition">
+                <button onclick="downloadVCard()" class="font-bold py-3 rounded-xl shadow-lg flex flex-col items-center justify-center gap-1 active:scale-95 transition btn-action-primary">
                     <i class="fas fa-address-card text-xl"></i><span>Sauvegarder</span>
                 </button>
                 <button onclick="openShareModal()" class="bg-white text-gray-800 border border-gray-200 font-bold py-3 rounded-xl shadow-sm flex flex-col items-center justify-center gap-1 active:scale-95 transition">
@@ -176,29 +187,29 @@
             <!-- WIDGETS -->
             <div class="w-full mb-8 pb-20">
                 <a href="#" id="link-phone" class="widget-card">
-                    <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xl"><i class="fas fa-phone"></i></div>
+                    <div class="widget-icon"><i class="fas fa-phone"></i></div>
                     <div class="flex-1"><div class="text-xs text-gray-400 font-bold uppercase">Téléphone</div><div id="v-phone-txt" class="font-medium text-gray-800"></div></div>
                     <i class="fas fa-chevron-right text-gray-300"></i>
                 </a>
                 <a href="#" id="link-email" class="widget-card">
-                    <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xl"><i class="fas fa-envelope"></i></div>
+                    <div class="widget-icon"><i class="fas fa-envelope"></i></div>
                     <div class="flex-1"><div class="text-xs text-gray-400 font-bold uppercase">Email</div><div id="v-email-txt" class="font-medium text-gray-800 break-all"></div></div>
                     <i class="fas fa-chevron-right text-gray-300"></i>
                 </a>
                 <a href="#" id="link-web" target="_blank" class="widget-card">
-                    <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xl"><i class="fas fa-globe"></i></div>
+                    <div class="widget-icon"><i class="fas fa-globe"></i></div>
                     <div class="flex-1"><div class="text-xs text-gray-400 font-bold uppercase">Site Web</div><div id="v-web-txt" class="font-medium text-gray-800 break-all"></div></div>
                     <i class="fas fa-chevron-right text-gray-300"></i>
                 </a>
                 <a href="#" id="link-linkedin" target="_blank" class="widget-card">
-                    <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xl"><i class="fab fa-linkedin-in"></i></div>
+                    <div class="widget-icon"><i class="fab fa-linkedin-in"></i></div>
                     <div class="flex-1"><div class="text-xs text-gray-400 font-bold uppercase">LinkedIn</div><div class="font-medium text-gray-800">Voir le profil</div></div>
                     <i class="fas fa-chevron-right text-gray-300"></i>
                 </a>
             </div>
         </div>
 
-        <button onclick="attemptEdit()" class="edit-trigger"><i class="fas fa-pen text-blue-600"></i><span>Modifier</span></button>
+        <button onclick="attemptEdit()" class="edit-trigger"><i class="fas fa-pen text-primary"></i><span>Modifier</span></button>
     </div>
 
     <!-- EDITEUR -->
@@ -206,19 +217,19 @@
         <div class="max-w-5xl mx-auto pt-8 px-4 sm:px-6 lg:px-8">
             <h1 class="text-3xl font-bold text-gray-900 mb-6">Ma carte</h1>
             <div class="flex flex-wrap justify-between items-center gap-4 mb-8">
-                <div class="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium shadow"><span id="editor-user-name">Utilisateur</span></div>
+                <div class="text-white px-4 py-2 rounded-lg font-medium shadow btn-action-primary"><span id="editor-user-name">Utilisateur</span></div>
                 <button onclick="toggleEditMode()" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition shadow-sm"><i class="fas fa-eye mr-2"></i> Voir ma carte</button>
             </div>
 
             <div class="bg-white rounded-t-xl shadow-sm border-b border-gray-200 flex overflow-x-auto">
-                <button class="tab-btn active flex-1 py-4 px-6 font-semibold text-blue-600 border-b-2 border-blue-600 whitespace-nowrap" onclick="openTab('tab-infos', this)"><i class="fas fa-file-alt mr-2"></i> Infos</button>
+                <button class="tab-btn active flex-1 py-4 px-6 font-semibold text-primary border-b-2 border-primary whitespace-nowrap" onclick="openTab('tab-infos', this)"><i class="fas fa-file-alt mr-2"></i> Infos</button>
                 <button class="tab-btn flex-1 py-4 px-6 font-semibold text-gray-500 whitespace-nowrap" onclick="openTab('tab-apparence', this)"><i class="fas fa-pen mr-2"></i> Apparence</button>
                 <button class="tab-btn flex-1 py-4 px-6 font-semibold text-gray-500 whitespace-nowrap" onclick="openTab('tab-widgets', this)"><i class="fas fa-th-large mr-2"></i> Widgets</button>
             </div>
 
             <div class="bg-white rounded-b-xl shadow-sm p-6 sm:p-10 min-h-[500px] relative">
                 <div class="absolute top-6 right-6 z-10">
-                    <button onclick="saveData()" id="btn-save" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-md transition flex items-center gap-2"><span>Sauvegarder</span></button>
+                    <button onclick="saveData()" id="btn-save" class="text-white font-bold py-2 px-6 rounded-lg shadow-md transition flex items-center gap-2 btn-action-primary"><span>Sauvegarder</span></button>
                 </div>
 
                 <div id="tab-infos" class="tab-content">
@@ -234,28 +245,28 @@
                         <input type="text" id="f-id" class="w-full bg-white border border-gray-300 rounded p-2 text-gray-500 cursor-not-allowed text-sm mb-4" readonly>
                         <label class="text-xs font-bold text-gray-500 uppercase">Code Secret (Pour modifier)</label>
                         <input type="text" id="f-code" class="w-full bg-white border border-gray-300 rounded p-2 text-gray-800 text-sm mb-4" placeholder="Définissez un mot de passe">
-                        <button onclick="resendEmail()" id="btn-email" class="text-sm text-blue-600 font-bold hover:underline"><i class="fas fa-envelope mr-1"></i> Renvoyer mes accès</button>
+                        <button onclick="resendEmail()" id="btn-email" class="text-sm font-bold hover:underline text-primary"><i class="fas fa-envelope mr-1"></i> Renvoyer mes accès</button>
                     </div>
                 </div>
 
                 <div id="tab-apparence" class="tab-content hidden">
                     <div class="mb-8 max-w-2xl">
-                        <label class="block text-blue-600 font-bold mb-2">Photo de profil</label>
+                        <label class="block font-bold mb-2 text-primary">Photo de profil</label>
                         <div class="input-file-wrapper"><button class="btn-add" onclick="triggerFileInput('photo')">Choisir & Recadrer</button><span id="name-photo" class="text-sm text-gray-500 ml-3 truncate">Aucun fichier</span><input type="file" id="upl-photo" class="hidden" accept="image/*" onchange="openCropper(event, 'photo', 1/1)"></div>
                         <input type="hidden" id="f-photo_url">
                     </div>
-                    <div class="mb-8 max-w-2xl"><label class="block text-blue-600 font-bold mb-2">Description</label><textarea id="f-desc" class="w-full border border-gray-300 rounded-lg p-3 h-24 resize-none outline-none"></textarea></div>
+                    <div class="mb-8 max-w-2xl"><label class="block font-bold mb-2 text-primary">Description</label><textarea id="f-desc" class="w-full border border-gray-300 rounded-lg p-3 h-24 resize-none outline-none"></textarea></div>
                     <div class="mb-8 max-w-2xl">
-                        <label class="block text-blue-600 font-bold mb-2">Logo</label>
+                        <label class="block font-bold mb-2 text-primary">Logo</label>
                         <div class="input-file-wrapper"><button class="btn-add" onclick="triggerFileInput('logo')">Choisir</button><span id="name-logo" class="text-sm text-gray-500 ml-3 truncate">Aucun fichier</span><input type="file" id="upl-logo" class="hidden" accept="image/*" onchange="handleFile(event, 'logo')"></div>
                         <input type="hidden" id="f-logo_url">
                     </div>
                     <div class="mb-8 max-w-2xl">
-                        <label class="block text-blue-600 font-bold mb-2">Bannière</label>
+                        <label class="block font-bold mb-2 text-primary">Bannière</label>
                         <div class="input-file-wrapper"><button class="btn-add" onclick="triggerFileInput('banner')">Choisir & Recadrer</button><span id="name-banner" class="text-sm text-gray-500 ml-3 truncate">Aucun fichier</span><input type="file" id="upl-banner" class="hidden" accept="image/*" onchange="openCropper(event, 'banner', 16/9)"></div>
                         <input type="hidden" id="f-banner_url">
                     </div>
-                    <div><label class="block text-blue-600 font-bold mb-3">Couleur Principale</label><input type="color" id="f-color1" class="w-16 h-10 cursor-pointer border rounded" value="#3b82f6"></div>
+                    <div><label class="block font-bold mb-3 text-primary">Couleur Principale</label><input type="color" id="f-color1" class="w-16 h-10 cursor-pointer border rounded" value="#3b82f6"></div>
                 </div>
 
                 <div id="tab-widgets" class="tab-content hidden">
@@ -270,50 +281,27 @@
         </div>
     </div>
 
-    <!-- PWA Service Worker Logic -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('service-worker.js')
-                    .then(registration => {
-                        console.log('SW enregistré:', registration);
-                    })
-                    .catch(error => {
-                        console.log('SW échec:', error);
-                    });
-            });
-        }
-
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            const installBtn = document.getElementById('pwa-install-prompt');
-            if (installBtn) installBtn.style.display = 'flex';
-        });
-
-        function installPWA() {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('PWA installée');
-                    }
-                    deferredPrompt = null;
-                    document.getElementById('pwa-install-prompt').style.display = 'none';
-                });
-            }
-        }
-    </script>
-
-    <!-- LOGIQUE EXISTANTE -->
     <script>
         const API_URL = 'https://script.google.com/macros/s/AKfycbz12V16okyQngAw7QCUeRZNsbI4jy5aH4vfSk-kxL3jl1Dl3P-f0pAxlX0CKtQgZnGE8A/exec'; 
         let currentUser = {}; let uploadQueue = {}; let cropperInstance = null; let currentCropType = null; let authCode = "";
 
         window.onload = async function() {
             const urlParams = new URLSearchParams(window.location.search);
-            const userId = urlParams.get('id'); const editMode = urlParams.get('edit'); const codeFromUrl = urlParams.get('code');
+            let userId = urlParams.get('id');
+            const editMode = urlParams.get('edit');
+            const codeFromUrl = urlParams.get('code');
+
+            // --- LOGIQUE PWA MULTI-COMPTES ---
+            if (userId) {
+                localStorage.setItem('welink_user_id', userId);
+            } else {
+                const savedId = localStorage.getItem('welink_user_id');
+                if (savedId) {
+                    userId = savedId;
+                    window.history.replaceState({}, '', `?id=${userId}`);
+                }
+            }
+
             if(userId) {
                 try {
                     const response = await fetch(API_URL); const data = await response.json(); const user = data.find(u => u.id == userId);
@@ -335,7 +323,11 @@
             if(data.photo_url) document.getElementById('v-photo').src = formatDriveLink(data.photo_url);
             if(data.logo_url) { const elLogo = document.getElementById('v-logo-img'); elLogo.src = formatDriveLink(data.logo_url); elLogo.style.display = 'block'; document.getElementById('v-logo-text').style.display = 'none'; }
             if(data.banner_url) document.getElementById('v-header-bg').style.backgroundImage = `url('${formatDriveLink(data.banner_url)}')`;
-            if(data.color1) document.documentElement.style.setProperty('--primary-color', data.color1);
+            
+            // COULEUR DYNAMIQUE
+            if(data.color1) {
+                document.documentElement.style.setProperty('--primary-color', data.color1);
+            }
         }
 
         function fillEditor(data) {
@@ -403,7 +395,7 @@
             }).catch(err => { alert("Erreur"); btn.innerHTML = originalText; btn.disabled = false; });
         }
 
-        function openTab(tabId, btn) { document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden')); document.querySelectorAll('.tab-btn').forEach(el => { el.classList.remove('active', 'border-blue-600', 'text-blue-600'); el.classList.add('text-gray-500', 'border-transparent'); }); document.getElementById(tabId).classList.remove('hidden'); btn.classList.remove('text-gray-500', 'border-transparent'); btn.classList.add('active', 'border-blue-600', 'text-blue-600'); }
+        function openTab(tabId, btn) { document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden')); document.querySelectorAll('.tab-btn').forEach(el => { el.classList.remove('active', 'border-primary', 'text-primary'); el.classList.add('text-gray-500', 'border-transparent'); }); document.getElementById(tabId).classList.remove('hidden'); btn.classList.remove('text-gray-500', 'border-transparent'); btn.classList.add('active', 'border-primary', 'text-primary'); }
         function triggerFileInput(type) { document.getElementById('upl-' + type).click(); }
         function openCropper(event, type, ar) { const file = event.target.files[0]; if(!file) return; currentCropType = type; document.getElementById('name-' + type).textContent = file.name; const r = new FileReader(); r.readAsDataURL(file); r.onload = function(e) { document.getElementById('image-to-crop').src = e.target.result; document.getElementById('crop-modal').style.display = 'flex'; if(cropperInstance) cropperInstance.destroy(); cropperInstance = new Cropper(document.getElementById('image-to-crop'), { aspectRatio: ar, viewMode: 1 }); }; }
         function closeCropper() { document.getElementById('crop-modal').style.display = 'none'; if(cropperInstance) { cropperInstance.destroy(); cropperInstance = null; } }
@@ -418,6 +410,11 @@
         function formatUrl(url) { if(!url) return null; return url.startsWith('http') ? url : 'https://' + url; }
         function formatDriveLink(link) { if (link && link.includes('drive.google.com') && link.includes('id=')) { const m = link.match(/id=([a-zA-Z0-9_-]+)/); if (m && m[1]) return "https://lh3.googleusercontent.com/d/" + m[1]; } return link; }
         function downloadVCard() { if(!currentUser.nom) return; const v = `BEGIN:VCARD\nVERSION:3.0\nFN:${currentUser.prenom||''} ${currentUser.nom||''}\nN:${currentUser.nom};${currentUser.prenom};;;\nTITLE:${currentUser.poste||''}\nORG:${currentUser.societe||''}\nTEL;TYPE=CELL:${currentUser.telephone||''}\nEMAIL:${currentUser.email||''}\nURL:${currentUser.site_web||''}\nEND:VCARD`; const b = new Blob([v], { type: 'text/vcard' }); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = 'contact.vcf'; a.click(); }
+        
+        // PWA Install
+        if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('service-worker.js').then(reg => console.log('SW OK')).catch(err => console.log('SW Fail')); }); }
+        let deferredPrompt; window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; document.getElementById('pwa-install-prompt').style.display = 'flex'; });
+        function installPWA() { if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt.userChoice.then((choiceResult) => { if (choiceResult.outcome === 'accepted') { console.log('PWA installée'); } deferredPrompt = null; document.getElementById('pwa-install-prompt').style.display = 'none'; }); } }
     </script>
 </body>
 </html>
